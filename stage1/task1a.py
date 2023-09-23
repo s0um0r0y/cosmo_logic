@@ -176,7 +176,7 @@ def detect_aruco(image):
             }
             detected_tags.append(tag_info)
     #print(detected_tags)
-    filter_tag=[tag for tag in detected_tags if tag['id'] in [obj_<>,obj_<>]]
+    #filter_tag=[tag for tag in detected_tags if tag['id'] in [obj_<>,obj_<>]]
 
     return center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids
 
@@ -238,7 +238,9 @@ class aruco_tf(Node):
         #   ->  HINT: You may use CvBridge to do the same
 
         ############################################
-
+        self.bridge=CvBridge()
+        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')       
+        return self.depth_image
 
     def colorimagecb(self, data):
         '''
@@ -264,7 +266,7 @@ class aruco_tf(Node):
         ############################################
         self.bridge=CvBridge()
         self.cv_image =self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
-
+        return self.cv_image
 
     def process_image(self):
         '''
