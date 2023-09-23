@@ -1,0 +1,23 @@
+[0.551s] Invoking command in '/home/soumoroy/cosmo_logic_ws/build/stage1': PYTHONPATH=/home/soumoroy/cosmo_logic_ws/build/stage1/prefix_override:/home/soumoroy/cosmo_logic_ws/install/stage1/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/soumoroy/cosmo_logic_ws/build/stage1/build --no-deps install_data
+[0.757s] running develop
+[0.897s] running egg_info
+[0.897s] creating stage1.egg-info
+[0.897s] writing stage1.egg-info/PKG-INFO
+[0.897s] writing dependency_links to stage1.egg-info/dependency_links.txt
+[0.897s] writing entry points to stage1.egg-info/entry_points.txt
+[0.898s] writing requirements to stage1.egg-info/requires.txt
+[0.898s] writing top-level names to stage1.egg-info/top_level.txt
+[0.899s] writing manifest file 'stage1.egg-info/SOURCES.txt'
+[0.900s] reading manifest file 'stage1.egg-info/SOURCES.txt'
+[0.901s] writing manifest file 'stage1.egg-info/SOURCES.txt'
+[0.901s] running build_ext
+[0.902s] Creating /home/soumoroy/cosmo_logic_ws/install/stage1/lib/python3.10/site-packages/stage1.egg-link (link to .)
+[0.902s] 
+[0.902s] Installed /home/soumoroy/cosmo_logic_ws/build/stage1
+[0.902s] running install_data
+[0.902s] creating /home/soumoroy/cosmo_logic_ws/install/stage1/share/ament_index
+[0.902s] creating /home/soumoroy/cosmo_logic_ws/install/stage1/share/ament_index/resource_index
+[0.902s] creating /home/soumoroy/cosmo_logic_ws/install/stage1/share/ament_index/resource_index/packages
+[0.903s] copying resource/stage1 -> /home/soumoroy/cosmo_logic_ws/install/stage1/share/ament_index/resource_index/packages
+[0.903s] copying package.xml -> /home/soumoroy/cosmo_logic_ws/install/stage1/share/stage1
+[0.926s] Invoked command in '/home/soumoroy/cosmo_logic_ws/build/stage1' returned '0': PYTHONPATH=/home/soumoroy/cosmo_logic_ws/build/stage1/prefix_override:/home/soumoroy/cosmo_logic_ws/install/stage1/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/soumoroy/cosmo_logic_ws/build/stage1/build --no-deps install_data
