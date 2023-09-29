@@ -166,7 +166,8 @@ def detect_aruco(image):
     gray = cv2.cvtColor(cv_image, cv2.COLOR_RGB2GRAY)
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
-    corners,ids,rejected=cv2.aruco.drawDetectedMarkers(gray,aruco_dict,parameters=aruco_params)
+    corners,ids,rejected=cv2.aruco.detectMarkers(gray,aruco_dict,parameters=aruco_params)
+    corners,ids,rejected=cv2.aruco.drawDetectedMarkers(cv_image,aruco_dict,parameters=aruco_params)
     #print(corners)
     #if ids is not None:
     #    for i in range(len(ids)):
@@ -200,6 +201,9 @@ def detect_aruco(image):
             distance_from_rgb_list.append(tvec[2])
             area,width=calculate_rectangle_area(corners)
             width_aruco_list.append(width)
+            cv2.drawFrameAxes(cv_image,cam_mat,dist_mat)
+    
+    cv2.imshow("frame",cv_image)
 
     return center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids
 
