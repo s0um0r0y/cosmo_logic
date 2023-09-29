@@ -163,20 +163,43 @@ def detect_aruco(image):
 
     bridge=CvBridge()
     cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='bgr8')
+    gray = cv2.cvtColor(cv_image, cv2.COLOR_RGB2GRAY)
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
-    corners,ids,_=cv2.aruco.drawDetectedMarkers(cv_image,aruco_dict,parameters=aruco_params)
-    print(corners)
-    if ids is not None:
-        for i in range(len(ids)):
-            calculate_rectangle_area(corners)
-            tag_info={
-                'id':ids[i],
-                'corners':corners[i]
-            }
-            detected_tags.append(tag_info)
+    corners,ids,rejected=cv2.aruco.drawDetectedMarkers(gray,aruco_dict,parameters=aruco_params)
+    #print(corners)
+    #if ids is not None:
+    #    for i in range(len(ids)):
+    #        calculate_rectangle_area(corners)
+    #        tag_info={
+    #            'id':ids[i],
+    #            'corners':corners[i]
+    #       }
+    #        detected_tags.append(tag_info)
     #print(detected_tags)
     #filter_tag=[tag for tag in detected_tags if tag['id'] in [obj_<>,obj_<>]]
+    if len(corners)>0:
+        #ids=ids.flatten()
+        for (markerCorner,markerID) in zip(corners,ids):
+            (topLeft,topRight,bottomRight,bottomLeft)=corners
+            topRight=(int(topRight[0]),int(topRight[1]))
+            bottomRight=(int(bottomRight[0]),int(bottomRight[1]))
+            bottomLeft=(int(bottomLeft[0]),int(bottomLeft[1]))
+            topLeft=(int(topLeft[0]),int(topLeft[1]))
+            cv2.line(image, topLeft, topRight, (0, 255, 0), 2)
+            cv2.line(image, topRight, bottomRight, (0, 255, 0), 2)
+            cv2.line(image, bottomRight, bottomLeft, (0, 255, 0), 2)
+            cv2.line(image, bottomLeft, topLeft, (0, 255, 0), 2)
+            cX=int((topLeft[0] + bottomRight[0]) / 2.0)
+            cY=int((topLeft[1] + bottomRight[1]) / 2.0)
+            cv2.circle(image, (cX, cY), 4, (0, 0, 255), -1)
+            cv2.putText(image, str(markerID),(topLeft[0], topLeft[1] - 10), cv2.FONT_HERSHEY_SIMPLEX,
+				0.5, (0, 255, 0), 2)
+            center_aruco_list.append([cX,cY])
+            rvec , tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners,size_of_aruco_m,cam_mat,dist_mat)
+            distance_from_rgb_list.append(tvec[2])
+            area,width=calculate_rectangle_area(corners)
+            width_aruco_list.append(width)
 
     return center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids
 
