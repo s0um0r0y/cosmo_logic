@@ -202,6 +202,7 @@ def detect_aruco(image):
             area,width=calculate_rectangle_area(corners)
             width_aruco_list.append(width)
             cv2.drawFrameAxes(cv_image,cam_mat,dist_mat)
+            angle_aruco_list.append(rvec)
     
     cv2.imshow("frame",cv_image)
 
@@ -292,7 +293,7 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.cv_image =self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
+        self.cv_image =self.bridge.imgmsg_to_cv2(data,desired_encoding='bgr8')
         return self.cv_image
 
     def process_image(self):
@@ -366,7 +367,14 @@ class aruco_tf(Node):
         #               Also, auto eval script will be judging angular difference aswell. So, make sure that Z axis is inside the box (Refer sample images on Portal - MD book)
 
         ############################################
-
+        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids=detect_aruco(image)
+        for angle_aruco in angle_aruco_list:
+            angle_aruco = (0.788*angle_aruco) - ((angle_aruco**2)/3160)
+        for distance_from_rgb,(cX,cY) in distance_from_rgb_list,center_aruco_list:
+            x=distance_from_rgb * (sizeCamX-cX-centerCamX)/focalX
+            y=distance_from_rgb * (sizeCamY-cY-centerCamY)/focalY
+            z=distance_from_rgb
+            cv2.circle(image,(cX,cY),4,(0,0,255),-1)
 
 ##################### FUNCTION DEFINITION #######################
 
