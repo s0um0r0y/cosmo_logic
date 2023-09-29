@@ -162,11 +162,11 @@ def detect_aruco(image):
     ############################################
 
     bridge=CvBridge()
-    cv_image =bridge.imgmsg_to_cv2(image, desired_encoding='bgr8')
+    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='bgr8')
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
     corners,ids,_=cv2.aruco.drawDetectedMarkers(cv_image,aruco_dict,parameters=aruco_params)
-    #print(corners)
+    print(corners)
     if ids is not None:
         for i in range(len(ids)):
             calculate_rectangle_area(corners)
@@ -239,7 +239,7 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')       
+        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')       
         return self.depth_image
 
     def colorimagecb(self, data):
