@@ -162,7 +162,7 @@ def detect_aruco(image):
     ############################################
 
     bridge=CvBridge()
-    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='bgr8')
+    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='passthrough')
     gray = cv2.cvtColor(cv_image, cv2.COLOR_RGB2GRAY)
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
@@ -375,6 +375,19 @@ class aruco_tf(Node):
             y=distance_from_rgb * (sizeCamY-cY-centerCamY)/focalY
             z=distance_from_rgb
             cv2.circle(Image,(cX,cY),4,(0,0,255),-1)
+        t=TransformStamped()
+        #sub
+        tf_broadcaster =tf2_ros.TransformBroadcaster()
+        t.header.stamp=self.get_clock().now().to_msg()
+        t.header.frame_id='camera_link'
+        t.child_frame_id='cam_<marker_id>'
+        #pub
+
+        t.header.frame_id='base_link'
+        t.child_frame_id='obj_<marker>'
+        tf_broadcaster.sendTransform(t)
+
+
 
 ##################### FUNCTION DEFINITION #######################
 
