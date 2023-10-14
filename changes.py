@@ -86,8 +86,8 @@ class MoveRobot:
         q = quaternion_from_euler(math.radians(-180),
                                   math.radians(0),
                                   math.radians(angle))
-        pose_target.position.x = x
-        pose_target.position.y = y
+        pose_target.position.x = 0.35
+        pose_target.position.y = 0.1
         pose_target.position.z = z
         pose_target.orientation.x = q[0]
         pose_target.orientation.y = q[1]
