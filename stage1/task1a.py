@@ -162,7 +162,9 @@ def detect_aruco(image):
     ############################################
 
     bridge=CvBridge()
-    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='passthrough')
+    cv2.imshow("frame1",image[1])
+    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='bgr8')
+    cv2.imshow("frame2",cv_image[1])
     gray = cv2.cvtColor(cv_image, cv2.COLOR_RGB2GRAY)
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
@@ -232,6 +234,7 @@ class aruco_tf(Node):
 
         self.color_cam_sub = self.create_subscription(Image, '/camera/color/image_raw', self.colorimagecb, 10)
         self.depth_cam_sub = self.create_subscription(Image, '/camera/aligned_depth_to_color/image_raw', self.depthimagecb, 10)
+        print(self.color_cam_sub)
 
         ############ Constructor VARIABLES/OBJECTS ############
 
@@ -267,8 +270,11 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')       
-        return self.depth_image
+        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='16UC1')      
+        color_depth = cv2.applyColorMap(cv2.convertScaleAbs(self.depth_image, alpha=0.03), cv2.COLORMAP_JET)
+        cv2.imshow("window1",color_depth)
+        return color_depth
+        
 
     def colorimagecb(self, data):
         '''
@@ -294,6 +300,7 @@ class aruco_tf(Node):
         ############################################
         self.bridge=CvBridge()
         self.cv_image =self.bridge.imgmsg_to_cv2(data,desired_encoding='bgr8')
+        cv2.imshow("window2",self.cv_image)
         return self.cv_image
 
     def process_image(self):
