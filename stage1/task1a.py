@@ -49,7 +49,7 @@ from sensor_msgs.msg import CompressedImage, Image
 def distance(point1,point2):
     x1,y1=point1
     x2,y2=point2
-    area=(x2-x1)*(y2-y1)
+    area=abs(x2-x1)*abs(y2-y1)
     width=(x2-x1)
     return area, width
 
@@ -133,7 +133,6 @@ def detect_aruco(image):
     width_aruco_list = []
     ids = []
     corners=[]
-    detected_tags=[]
  
     ############ ADD YOUR CODE HERE ############
 
@@ -161,52 +160,36 @@ def detect_aruco(image):
 
     ############################################
 
-    bridge=CvBridge()
-    cv2.imshow("frame1",image[1])
-    cv_image=bridge.imgmsg_to_cv2(image,desired_encoding='bgr8')
-    cv2.imshow("frame2",cv_image[1])
-    gray = cv2.cvtColor(cv_image, cv2.COLOR_RGB2GRAY)
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
-    corners,ids,rejected=cv2.aruco.detectMarkers(gray,aruco_dict,parameters=aruco_params)
-    corners,ids,rejected=cv2.aruco.drawDetectedMarkers(cv_image,aruco_dict,parameters=aruco_params)
-    #print(corners)
-    #if ids is not None:
-    #    for i in range(len(ids)):
-    #        calculate_rectangle_area(corners)
-    #        tag_info={
-    #            'id':ids[i],
-    #            'corners':corners[i]
-    #       }
-    #        detected_tags.append(tag_info)
-    #print(detected_tags)
-    #filter_tag=[tag for tag in detected_tags if tag['id'] in [obj_<>,obj_<>]]
-    if len(corners)>0:
-        #ids=ids.flatten()
-        for (markerCorner,markerID) in zip(corners,ids):
-            (topLeft,topRight,bottomRight,bottomLeft)=corners
-            topRight=(int(topRight[0]),int(topRight[1]))
-            bottomRight=(int(bottomRight[0]),int(bottomRight[1]))
-            bottomLeft=(int(bottomLeft[0]),int(bottomLeft[1]))
-            topLeft=(int(topLeft[0]),int(topLeft[1]))
-            cv2.line(image, topLeft, topRight, (0, 255, 0), 2)
-            cv2.line(image, topRight, bottomRight, (0, 255, 0), 2)
-            cv2.line(image, bottomRight, bottomLeft, (0, 255, 0), 2)
-            cv2.line(image, bottomLeft, topLeft, (0, 255, 0), 2)
-            cX=int((topLeft[0] + bottomRight[0]) / 2.0)
-            cY=int((topLeft[1] + bottomRight[1]) / 2.0)
-            cv2.circle(image, (cX, cY), 4, (0, 0, 255), -1)
-            cv2.putText(image, str(markerID),(topLeft[0], topLeft[1] - 10), cv2.FONT_HERSHEY_SIMPLEX,
-				0.5, (0, 255, 0), 2)
-            center_aruco_list.append([cX,cY])
-            rvec , tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners,size_of_aruco_m,cam_mat,dist_mat)
-            distance_from_rgb_list.append(tvec[2])
-            area,width=calculate_rectangle_area(corners)
-            width_aruco_list.append(width)
-            cv2.drawFrameAxes(cv_image,cam_mat,dist_mat)
-            angle_aruco_list.append(rvec)
+    gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    corners,ids,_=cv2.aruco.drawDetectedMarkers(gray,aruco_dict,parameters=aruco_params)
+    if ids is not None:
+        for i in range(len(ids)):
+            marker_id = ids[i]
+            area=calculate_rectangle_area(corners[i][0])
+            if area > aruco_area_threshold:
+                # Draw the detected marker on the image
+                cv2.aruco.drawDetectedMarkers(image, corners)
+
+                # Calculate the center point of the ArUco marker
+                center_x = int(np.mean(corners[i][:, 0]))
+                center_y = int(np.mean(corners[i][:, 1]))
+                center_aruco_list.append((center_x, center_y))
+
+                # Estimate the pose of the ArUco marker
+                rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners[i], size_of_aruco_m, cam_mat, dist_mat)
+
+                # Extract the distance from the RGB camera
+                distance = tvecs[0][0][2]
+                distance_from_rgb_list.append(distance)
+
+                # Extract the orientation angles
+                angle_aruco_list.append((rvecs[0][0][0], rvecs[0][0][1], rvecs[0][0][2]))
+
+                # Extract the width of the marker
+                width_aruco_list.append(size_of_aruco_m)
     
-    cv2.imshow("frame",cv_image)
 
     return center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids
 
@@ -234,14 +217,13 @@ class aruco_tf(Node):
 
         self.color_cam_sub = self.create_subscription(Image, '/camera/color/image_raw', self.colorimagecb, 10)
         self.depth_cam_sub = self.create_subscription(Image, '/camera/aligned_depth_to_color/image_raw', self.depthimagecb, 10)
-        print(self.color_cam_sub)
 
         ############ Constructor VARIABLES/OBJECTS ############
 
         image_processing_rate = 0.2                                                     # rate of time to process image (seconds)
         self.bridge = CvBridge()                                                        # initialise CvBridge object for image conversion
         self.tf_buffer = tf2_ros.buffer.Buffer()                                        # buffer time used for listening transforms
-        self.listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.listener = tf2_ros.TransformListener(self.tf_buffer,self)
         self.br = tf2_ros.TransformBroadcaster(self)                                    # object as transform broadcaster to send transform wrt some frame_id
         self.timer = self.create_timer(image_processing_rate, self.process_image)       # creating a timer based function which gets called on every 0.2 seconds (as defined by 'image_processing_rate' variable)
         
@@ -270,11 +252,8 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='16UC1')      
-        color_depth = cv2.applyColorMap(cv2.convertScaleAbs(self.depth_image, alpha=0.03), cv2.COLORMAP_JET)
-        cv2.imshow("window1",color_depth)
-        return color_depth
-        
+        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')      
+        return self.depth_image
 
     def colorimagecb(self, data):
         '''
@@ -299,11 +278,10 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.cv_image =self.bridge.imgmsg_to_cv2(data,desired_encoding='bgr8')
-        cv2.imshow("window2",self.cv_image)
+        self.cv_image =self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
         return self.cv_image
 
-    def process_image(self):
+    def process_image(self,Image):
         '''
         Description:    Timer function used to detect aruco markers and publish tf on estimated poses.
 
@@ -374,27 +352,49 @@ class aruco_tf(Node):
         #               Also, auto eval script will be judging angular difference aswell. So, make sure that Z axis is inside the box (Refer sample images on Portal - MD book)
 
         ############################################
-        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids=detect_aruco(Image)
-        for angle_aruco in angle_aruco_list:
-            angle_aruco = (0.788*angle_aruco) - ((angle_aruco**2)/3160)
-        for distance_from_rgb,(cX,cY) in distance_from_rgb_list,center_aruco_list:
-            x=distance_from_rgb * (sizeCamX-cX-centerCamX)/focalX
-            y=distance_from_rgb * (sizeCamY-cY-centerCamY)/focalY
-            z=distance_from_rgb
-            cv2.circle(Image,(cX,cY),4,(0,0,255),-1)
-        t=TransformStamped()
-        #sub
-        tf_broadcaster =tf2_ros.TransformBroadcaster()
-        t.header.stamp=self.get_clock().now().to_msg()
-        t.header.frame_id='camera_link'
-        t.child_frame_id='cam_<marker_id>'
-        #pub
 
-        t.header.frame_id='base_link'
-        t.child_frame_id='obj_<marker>'
-        tf_broadcaster.sendTransform(t)
+        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(Image)
 
+        for i in range(len(ids)):
+            marker_id=ids[i]
+            aruco_angle=angle_aruco_list[i]    
+            corrected_aruco_angle = (0.788 * aruco_angle) - ((aruco_angle ** 2) / 3160)
+            roll = 0.0
+            pitch = 0.0
+            yaw = corrected_aruco_angle
+            qx = math.sin(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) - math.cos(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
+            qy = math.cos(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2)
+            qz = math.cos(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2) - math.sin(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2)
+            qw = math.cos(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)  
+            depth=distance_from_rgb_list[i] / 1000.0 
+            cX, cY = center_aruco_list[i]
+            x = depth * (sizeCamX - cX - centerCamX) / focalX
+            y = depth * (sizeCamY - cY - centerCamY) / focalY
+            z = depth
+            tf_msg = TransformStamped()
+            #tf_msg.header.stamp = rclpy.time.Time().to_msg()
+            tf_msg.header.frame_id = 'camera_link'
+            tf_msg.child_frame_id = f'cam_{marker_id}'
+            tf_msg.transform.translation.x = x
+            tf_msg.transform.translation.y = y
+            tf_msg.transform.translation.z = z
+            tf_msg.transform.rotation.x = qx
+            tf_msg.transform.rotation.y = qy
+            tf_msg.transform.rotation.z = qz
+            tf_msg.transform.rotation.w = qw
+            self.tf_broadcaster=self.br
+            self.tf_broadcaster.sendTransform(tf_msg)
+            try:
+                trans =self.tf_buffer.lookup_transform('base_link', f'obj_{marker_id}')
+                self.tf_broadcaster.sendTransform(trans)
+            except (tf2_ros.LookupException, tf2_ros.ExtrapolationException, tf2_ros.ConnectivityException):
+                pass
 
+            for cX, cY in center_aruco_list:
+                cv2.circle(Image, (cX, cY), 5, (0, 255, 0), -1)
+
+            cv2.imshow("Aruco Detection",Image)
+            cv2.waitKey(1)
 
 ##################### FUNCTION DEFINITION #######################
 
