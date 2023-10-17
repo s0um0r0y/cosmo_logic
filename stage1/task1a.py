@@ -162,8 +162,11 @@ def detect_aruco(image):
 
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
+    #gray = np.array(image, dtype=np.uint8)
+    #image=cv2.imread(image)
+    #print(image)
     gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    corners,ids,_=cv2.aruco.drawDetectedMarkers(gray,aruco_dict,parameters=aruco_params)
+    corners,ids,_=cv2.aruco.drawDetectedMarkers(gray,aruco_dict)
     if ids is not None:
         for i in range(len(ids)):
             marker_id = ids[i]
@@ -227,8 +230,8 @@ class aruco_tf(Node):
         self.br = tf2_ros.TransformBroadcaster(self)                                    # object as transform broadcaster to send transform wrt some frame_id
         self.timer = self.create_timer(image_processing_rate, self.process_image)       # creating a timer based function which gets called on every 0.2 seconds (as defined by 'image_processing_rate' variable)
         
-        self.cv_image = None                                                            # colour raw image variable (from colorimagecb())
-        self.depth_image = None                                                         # depth image variable (from depthimagecb())
+        self.cv_image=self.color_cam_sub                                                           # colour raw image variable (from colorimagecb())
+        self.depth_image=self.depth_cam_sub                                                                      # depth image variable (from depthimagecb())
 
 
     def depthimagecb(self, data):
@@ -252,7 +255,10 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')      
+        try:
+            self.depth_image=self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')  
+        except CvBridgeError as e:
+            self.get_logger().error(f'Error converting depth image: {e}')    
         return self.depth_image
 
     def colorimagecb(self, data):
@@ -278,10 +284,14 @@ class aruco_tf(Node):
 
         ############################################
         self.bridge=CvBridge()
-        self.cv_image =self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
+        try:
+            self.cv_image =self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
+        except CvBridgeError as e:
+            self.get_logger().error(f'Error converting colour image: {e}')
         return self.cv_image
 
-    def process_image(self,Image):
+    
+    def process_image(self):
         '''
         Description:    Timer function used to detect aruco markers and publish tf on estimated poses.
 
@@ -353,7 +363,7 @@ class aruco_tf(Node):
 
         ############################################
 
-        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(Image)
+        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(image=self.cv_image)
 
         for i in range(len(ids)):
             marker_id=ids[i]
@@ -395,6 +405,8 @@ class aruco_tf(Node):
 
             cv2.imshow("Aruco Detection",Image)
             cv2.waitKey(1)
+
+
 
 ##################### FUNCTION DEFINITION #######################
 
