@@ -46,13 +46,6 @@ from sensor_msgs.msg import CompressedImage, Image
 
 ##################### FUNCTION DEFINITIONS #######################
 
-def distance(point1,point2):
-    x1,y1=point1
-    x2,y2=point2
-    area=abs(x2-x1)*abs(y2-y1)
-    width=(x2-x1)
-    return area, width
-
 def calculate_rectangle_area(coordinates):
     '''
     Description:    Function to calculate area or detected aruco
@@ -82,13 +75,14 @@ def calculate_rectangle_area(coordinates):
 
     ############################################
     
-    n=len(coordinates)
-    distances=[[0.0] * n for case in range(n)]
-    for i in range(n):
-        for j in range(i,n):
-            distances[i][j]=distance(coordinates[i],coordinates[j])
-            distances[j][i]=distances[i][j]
+    if len(coordinates) != 4:
+        return 0.0, 0.0
 
+    width = np.linalg.norm(coordinates[0] - coordinates[1])
+    height = np.linalg.norm(coordinates[1] - coordinates[2])
+    area = width * height
+
+    return area,width
 
 def detect_aruco(image):
     '''
@@ -162,15 +156,14 @@ def detect_aruco(image):
 
     aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     aruco_params=cv2.aruco.DetectorParameters()
-    #gray = np.array(image, dtype=np.uint8)
-    #image=cv2.imread(image)
-    #print(image)
+    cv2.imshow("gray",image)
     gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    corners,ids,_=cv2.aruco.drawDetectedMarkers(gray,aruco_dict)
+    corners,ids,_=cv2.aruco.detectMarkers(gray,aruco_dict)
     if ids is not None:
         for i in range(len(ids)):
             marker_id = ids[i]
-            area=calculate_rectangle_area(corners[i][0])
+            # print(corners[i][0])
+            area,width=calculate_rectangle_area(corners[i][0])
             if area > aruco_area_threshold:
                 # Draw the detected marker on the image
                 cv2.aruco.drawDetectedMarkers(image, corners)
@@ -366,8 +359,10 @@ class aruco_tf(Node):
         center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(image=self.cv_image)
 
         for i in range(len(ids)):
+            # for j in range(0,3):
             marker_id=ids[i]
-            aruco_angle=angle_aruco_list[i]    
+            aruco_angle=angle_aruco_list[i]
+            print(aruco_angle)   
             corrected_aruco_angle = (0.788 * aruco_angle) - ((aruco_angle ** 2) / 3160)
             roll = 0.0
             pitch = 0.0
