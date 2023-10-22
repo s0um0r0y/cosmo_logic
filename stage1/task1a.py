@@ -225,6 +225,8 @@ class aruco_tf(Node):
         
         self.cv_image=self.color_cam_sub                                                           # colour raw image variable (from colorimagecb())
         self.depth_image=self.depth_cam_sub                                                                      # depth image variable (from depthimagecb())
+        self.depth_srv=self.create_service(self.depth_cam_sub, 'pub_tf',self.depthimagecb)
+        self.color_srv=self.create_service(self.color_cam_sub, 'pub_tf',self.colorimagecb)
 
 
     def depthimagecb(self, data):
@@ -359,25 +361,27 @@ class aruco_tf(Node):
         center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(image=self.cv_image)
 
         for i in range(len(ids)):
-            # for j in range(0,3):
             marker_id=ids[i]
             aruco_angle=angle_aruco_list[i]
-            print(aruco_angle)   
-            corrected_aruco_angle = (0.788 * aruco_angle) - ((aruco_angle ** 2) / 3160)
-            roll = 0.0
-            pitch = 0.0
-            yaw = corrected_aruco_angle
-            qx = math.sin(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) - math.cos(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
-            qy = math.cos(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2)
-            qz = math.cos(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2) - math.sin(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2)
-            qw = math.cos(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)  
+            for j in range(0,3):
+                corrected_aruco_angle = (0.788 * aruco_angle[j]) - ((aruco_angle[j] ** 2) / 3160)
+                roll = 0.0
+                pitch = 0.0
+                yaw = corrected_aruco_angle
+                qx = math.sin(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) - math.cos(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)
+                qy = math.cos(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2)
+                qz = math.cos(roll / 2) * math.cos(pitch / 2) * math.sin(yaw / 2) - math.sin(roll / 2) * math.sin(pitch / 2) * math.cos(yaw / 2)
+                qw = math.cos(roll / 2) * math.cos(pitch / 2) * math.cos(yaw / 2) + math.sin(roll / 2) * math.sin(pitch / 2) * math.sin(yaw / 2)  
+                # print(qx,qy,qz,qw)
             depth=distance_from_rgb_list[i] / 1000.0 
             cX, cY = center_aruco_list[i]
             x = depth * (sizeCamX - cX - centerCamX) / focalX
             y = depth * (sizeCamY - cY - centerCamY) / focalY
             z = depth
+            for cX, cY in center_aruco_list:
+                cv2.circle(self.cv_image, (cX, cY), 5, (0, 255, 0), -1)
             tf_msg = TransformStamped()
-            #tf_msg.header.stamp = rclpy.time.Time().to_msg()
+            tf_msg.header.stamp=self.get_clock().now().to_msg()
             tf_msg.header.frame_id = 'camera_link'
             tf_msg.child_frame_id = f'cam_{marker_id}'
             tf_msg.transform.translation.x = x
@@ -389,14 +393,15 @@ class aruco_tf(Node):
             tf_msg.transform.rotation.w = qw
             self.tf_broadcaster=self.br
             self.tf_broadcaster.sendTransform(tf_msg)
+            lookup_time=self.create_timer(1.0, self._timers) 
             try:
-                trans =self.tf_buffer.lookup_transform('base_link', f'obj_{marker_id}')
+                trans =self.tf_buffer.lookup_transform('base_link', f'obj_{marker_id}', time=lookup_time)
                 self.tf_broadcaster.sendTransform(trans)
             except (tf2_ros.LookupException, tf2_ros.ExtrapolationException, tf2_ros.ConnectivityException):
                 pass
 
-            for cX, cY in center_aruco_list:
-                cv2.circle(Image, (cX, cY), 5, (0, 255, 0), -1)
+            # for cX, cY in center_aruco_list:
+            #     cv2.circle(Image, (cX, cY), 5, (0, 255, 0), -1)
 
             cv2.imshow("Aruco Detection",Image)
             cv2.waitKey(1)
