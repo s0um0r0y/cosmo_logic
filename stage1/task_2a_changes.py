@@ -69,7 +69,7 @@ def main():
       self.get_logger().info('EEF service not available, waiting again...')
 
     req = AttachLink.Request()
-    req.model1_name =  <Specify the box name>      
+    req.model1_name =  box1     
     req.link1_name  = 'link'       
     req.model2_name =  'ur5'       
     req.link2_name  = 'wrist_3_link'  
@@ -85,8 +85,8 @@ def main():
     while not gripper_control.wait_for_service(timeout_sec=1.0):
       self.get_logger().info('EEF service not available, waiting again...')
 
-    req = AttachLink.Request()
-    req.model1_name =  <Specify the box name>      
+    req = DetachLink.Request()
+    req.model1_name =  box1     
     req.link1_name  = 'link'       
     req.model2_name =  'ur5'       
     req.link2_name  = 'wrist_3_link'  
