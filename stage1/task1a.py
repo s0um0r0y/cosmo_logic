@@ -225,8 +225,9 @@ class aruco_tf(Node):
         
         self.cv_image=self.color_cam_sub                                                           # colour raw image variable (from colorimagecb())
         self.depth_image=self.depth_cam_sub                                                                      # depth image variable (from depthimagecb())
-        self.depth_srv=self.create_service(self.depth_cam_sub, 'pub_tf',self.depthimagecb)
-        self.color_srv=self.create_service(self.color_cam_sub, 'pub_tf',self.colorimagecb)
+        
+        self.depth_srv=self.create_service(self.timer, 'pub_tf',self.depthimagecb)
+        self.color_srv=self.create_service(self.timer, 'pub_tf',self.colorimagecb)
 
 
     def depthimagecb(self, data):
@@ -285,7 +286,6 @@ class aruco_tf(Node):
             self.get_logger().error(f'Error converting colour image: {e}')
         return self.cv_image
 
-    
     def process_image(self):
         '''
         Description:    Timer function used to detect aruco markers and publish tf on estimated poses.
@@ -360,6 +360,8 @@ class aruco_tf(Node):
 
         center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids = detect_aruco(image=self.cv_image)
 
+        # self.depth_srv=self.create_service(depth_cam_sub, 'pub_tf',self.depthimagecb)
+        # self.color_srv=self.create_service(color_cam_sub, 'pub_tf',self.colorimagecb)
         for i in range(len(ids)):
             marker_id=ids[i]
             aruco_angle=angle_aruco_list[i]
@@ -382,29 +384,37 @@ class aruco_tf(Node):
                 cv2.circle(self.cv_image, (cX, cY), 5, (0, 255, 0), -1)
             tf_msg = TransformStamped()
             tf_msg.header.stamp=self.get_clock().now().to_msg()
-            tf_msg.header.frame_id = 'camera_link'
-            tf_msg.child_frame_id = f'cam_{marker_id}'
+            tf_msg.header.frame_id = 'base_link'
+            tf_msg.child_frame_id= 'obj_1'
+            # tf_msg.child_frame_id = f'cam_{marker_id}'
             tf_msg.transform.translation.x = x
             tf_msg.transform.translation.y = y
             tf_msg.transform.translation.z = z
-            tf_msg.transform.rotation.x = qx
-            tf_msg.transform.rotation.y = qy
-            tf_msg.transform.rotation.z = qz
-            tf_msg.transform.rotation.w = qw
-            self.tf_broadcaster=self.br
-            self.tf_broadcaster.sendTransform(tf_msg)
-            lookup_time=self.create_timer(1.0, self._timers) 
-            try:
-                trans =self.tf_buffer.lookup_transform('base_link', f'obj_{marker_id}', time=lookup_time)
-                self.tf_broadcaster.sendTransform(trans)
-            except (tf2_ros.LookupException, tf2_ros.ExtrapolationException, tf2_ros.ConnectivityException):
-                pass
+            # tf_msg.transform.rotation.x = qx
+            # tf_msg.transform.rotation.y = qy
+            # tf_msg.transform.rotation.z = qz
+            # tf_msg.transform.rotation.w = qw
+            tf_msg.transform.rotation.x = 0.0
+            tf_msg.transform.rotation.y = 0.0
+            tf_msg.transform.rotation.z = 0.0
+            tf_msg.transform.rotation.w = 1.0
+            # self.tf_broadcaster=self.br
+            self.br.sendTransform(tf_msg)
+            # lookup_time=self.create_timer(1.0, self._timers) 
+            # try:
+            #     trans =self.tf_buffer.lookup_transform('base_link', f'obj_{marker_id}', time=lookup_time)
+            #     self.tf_broadcaster.sendTransform(trans)
+            # except (tf2_ros.LookupException, tf2_ros.ExtrapolationException, tf2_ros.ConnectivityException):
+            #     pass
 
-            # for cX, cY in center_aruco_list:
-            #     cv2.circle(Image, (cX, cY), 5, (0, 255, 0), -1)
+            # # for cX, cY in center_aruco_list:
+            # #     cv2.circle(Image, (cX, cY), 5, (0, 255, 0), -1)
 
             cv2.imshow("Aruco Detection",Image)
             cv2.waitKey(1)
+
+
+
 
 
 
