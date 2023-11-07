@@ -73,6 +73,7 @@ def main():
     req.link1_name  = 'link'       
     req.model2_name =  'ur5'       
     req.link2_name  = 'wrist_3_link'  
+    gripper_control.call_async(req)
 
     
     moveit2.move_to_pose(position=position1, quat_xyzw=quat_xyzw1, cartesian=cartesian)
@@ -90,6 +91,7 @@ def main():
     req.link1_name  = 'link'       
     req.model2_name =  'ur5'       
     req.link2_name  = 'wrist_3_link'  
+    gripper_control.call_async(req)
     
     moveit2.move_to_pose(position=position2, quat_xyzw=quat_xyzw2, cartesian=cartesian)
     moveit2.wait_until_executed()
@@ -99,7 +101,7 @@ def main():
     moveit2.move_to_pose(position=position1, quat_xyzw=quat_xyzw1, cartesian=cartesian)
     moveit2.wait_until_executed()
    
-    gripper_control.call_async(req)
+
 
 
     node.get_logger().info(
