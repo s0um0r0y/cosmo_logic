@@ -10,7 +10,7 @@ import math, time
 from copy import deepcopy
 import rclpy
 import tf2_ros
-from tf2_ros import TransformListener
+from tf2_ros import TransformListener,TFMessage
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 from geometry_msgs.msg import TwistStamped,TransformStamped
@@ -33,29 +33,36 @@ class Servocontroller(Node):
         # self.target_pose=[translation.x,translation.y,translation.z]
         # self.target_pose=[0.3014,0.1023,0.629]
         self.stop_threshold=0.2
+        self.subscription1=None
 
         self.timer=self.create_timer(0.02,self.servo_reach_target,ReentrantCallbackGroup())
 
     def transform_callback(self,msg):
-        self.translation=msg.transform.translation
-        self.rotation=msg.transform.rotation
-        self.frame_id=msg.header.frame_id
-        self.child_frame_id=msg.child_frame_id
+        try:
+            # print(msg)
+            for transform_stamped in msg.transforms:
+                self.translation = transform_stamped.transform.translation
+                self.rotation = transform_stamped.transform.rotation
+                self.frame_id = transform_stamped.header.frame_id
+                # self.child_frame_id = transform_stamped.header.child_frame_id
 
-        self.get_logger().info(
-            f"Received transform: Translation({self.translation.x}, {self.translation.y}, {self.translation.z}), "
-            f"Rotation({self.rotation.x}, {self.rotation.y}, {self.rotation.z}, {self.rotation.w}) "
-            f"from frame '{self.frame_id}' to frame '{self.child_frame_id}'"
-        )
+                # self.get_logger().info(
+                #     f"Received transform: Translation({self.translation.x}, {self.translation.y}, {self.translation.z}), "
+                #     f"Rotation({self.rotation.x}, {self.rotation.y}, {self.rotation.z}, {self.rotation.w}) "
+                #     f"from frame '{self.frame_id}' to frame '{self.child_frame_id}'"
+                # )
 
-        self.target_pose=[self.translation.x,self.translation.y,self.translation.z]
+                self.target_pose=[self.translation.x,self.translation.y,self.translation.z]
+        
+        except Exception as e:
+                self.get_logger().error(f"Error in transform_callback: {e}")
 
     def transform_subscription(self):
-        self.subscriptions=self.create_subscription(TransformStamped,'tf',self.transform_callback,10)
-        self.subscriptions
+        self.subscription1=self.create_subscription(TFMessage,'/tf',self.transform_callback,10)
 
     def servo_reach_target(self):
-            transform=self.tf_buffer.lookup_transform('base_link','tool0',rclpy.time.Time().to_msg())
+        try:
+            transform=self.tf_buffer.lookup_transform('base_link','obj_1',rclpy.time.Time().to_msg())
             translation=transform.transform.translation
 
             current_pose=[translation.x,translation.y,translation.z]
@@ -80,6 +87,12 @@ class Servocontroller(Node):
                 twist_msg.twist.linear.z=linear_velocity[2]
                 twist_msg.header.stamp=self.get_clock().now().to_msg()
                 self.twist_pub.publish(twist_msg)
+        
+        # except Exception as e:
+        #     self.get_logger().error(f"Error in servo_reach_target: {e}")
+        
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            pass
 
     def start_servo_service(self):
         start_servo_client=self.create_client(Trigger,'/servo_node/start_servo')
