@@ -10,9 +10,10 @@ import math, time
 from copy import deepcopy
 import rclpy
 import tf2_ros
+from tf2_ros import TransformListener
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import TwistStamped,TransformStamped
 from pymoveit2.robots import ur5
 from rclpy.qos import (
     QoSDurabilityPolicy,
@@ -29,16 +30,36 @@ class Servocontroller(Node):
         self.tf_buffer=tf2_ros.Buffer(Duration(seconds=1))
         self.tf_listener=tf2_ros.TransformListener(self.tf_buffer,self)
 
-        self.target_pose=[0.35,0.1,0.68]
-        self.stop_threshold=0.1
+        # self.target_pose=[translation.x,translation.y,translation.z]
+        # self.target_pose=[0.3014,0.1023,0.629]
+        self.stop_threshold=0.2
 
         self.timer=self.create_timer(0.02,self.servo_reach_target,ReentrantCallbackGroup())
+
+    def transform_callback(self,msg):
+        self.translation=msg.transform.translation
+        self.rotation=msg.transform.rotation
+        self.frame_id=msg.header.frame_id
+        self.child_frame_id=msg.child_frame_id
+
+        self.get_logger().info(
+            f"Received transform: Translation({self.translation.x}, {self.translation.y}, {self.translation.z}), "
+            f"Rotation({self.rotation.x}, {self.rotation.y}, {self.rotation.z}, {self.rotation.w}) "
+            f"from frame '{self.frame_id}' to frame '{self.child_frame_id}'"
+        )
+
+        self.target_pose=[self.translation.x,self.translation.y,self.translation.z]
+
+    def transform_subscription(self):
+        self.subscriptions=self.create_subscription(TransformStamped,'tf',self.transform_callback,10)
+        self.subscriptions
 
     def servo_reach_target(self):
             transform=self.tf_buffer.lookup_transform('base_link','tool0',rclpy.time.Time().to_msg())
             translation=transform.transform.translation
 
             current_pose=[translation.x,translation.y,translation.z]
+            print(current_pose)
 
             distance=math.sqrt((self.target_pose[0]-current_pose[0])**2+
                                (self.target_pose[1]-current_pose[1])**2+
@@ -57,9 +78,7 @@ class Servocontroller(Node):
                 twist_msg.twist.linear.x=linear_velocity[0]
                 twist_msg.twist.linear.y=linear_velocity[1]
                 twist_msg.twist.linear.z=linear_velocity[2]
-
                 twist_msg.header.stamp=self.get_clock().now().to_msg()
-
                 self.twist_pub.publish(twist_msg)
 
     def start_servo_service(self):
@@ -83,6 +102,8 @@ def main():
     rclpy.init()
     node = Servocontroller()
     node.start_servo_service()
+    node.transform_subscription()
+    node.servo_reach_target()
     rclpy.spin(node=node)
     rclpy.shutdown()
     
