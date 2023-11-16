@@ -82,6 +82,22 @@ In this task, we have applied the primary usage of the Python language. This tas
 | 10 |   Slice the list                                 |   SLICE1_PY   |  1220     |  32.89      |
 
 
+# Task 1: Theme Setup - Introduction to ROS 2
+
+The aim of this task is to complete installation, learn about ROS 2, and set up the robot environment for this theme.
+
+This task is divided into three parts:
+
+## 1. Installation
+- Install Ubuntu 22.04 (Jammy Jellyfish) and ROS 2 (Humble).
+![figure1]((https://cdn-icons-png.flaticon.com/512/5969/5969282.png))
+## 2. Learning Resources
+- Explore the following learning resources to get hands-on experience with ROS 2 and Python.
+![figure1]((https://www.python.org/static/img/python-logo.png))
+## 3. Warehouse Setup
+- Install and build the required packages for this theme.
+- Start exploring the robot environment in Gazebo.
+![figure1](https://raw.githubusercontent.com/ros-visualization/rviz/noetic-devel/images/splash.png)
 
 
 
