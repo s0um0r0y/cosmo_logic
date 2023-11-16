@@ -12,6 +12,13 @@ The “Cosmo Logistic” theme of eYRC 2023-24 is set in a warehouse used for in
 
 We have learnt to navigate this mobile robot with the help of SLAM (simultaneous localization and mapping) method in a warehouse. We have detected and localised the packages placed on racks, and manipulated the robotic arm to pick them up. In stage 1 of the competition, our team  completed this theme in a simulator (Gazebo).
 
+## TEAM MEMBERS ##
+| Name              | Branch          | Email ID                   | Area of Interest         |
+|-------------------|-----------------|----------------------------|--------------------------|
+|Soumo Roy          | Branch 1        | team.member1@email.com     | Area of Interest 1       |
+| Team Member 2     | Branch 2        | team.member2@email.com     | Area of Interest 2       |
+| Team Member 3     | Branch 3        | team.member3@email.com     | Area of Interest 3       |
+| Team Member 4     | Branch 4        | team.member4@email.com     | Area of Interest 4       |
 
 
 
