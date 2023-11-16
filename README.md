@@ -34,6 +34,23 @@ Simulator + Real Industrial Robot (Remote Access)
 - **Graphics Card:** Dedicated graphics card preferred
 - **Internet:** Minimum speed of 5 Mbps & latency <= 50ms
 
+# Competition Timeline
+
+## 1st to 25th Aug, 2023 - Registrations
+
+Team of two to four students from the same college, any year/discipline can register for the competition.
+
+## 1st Week of Sept, 2023 - Theme Assignment
+
+Based on the members’ filled profile details and theme preferences, e-Yantra will assign the best-suited theme for the team.
+
+After the registration and payment, teams will be inducted into Stage 1 of the competition.
+
+## Sept, 2023 - Nov, 2023 - Stage 1
+
+Stage 1 is divided into three tasks: Task 0, Task 1, and Task 2. All the tasks will be either in simulation or will be software-based (MOOC).
+
+Top-performing teams will be selected for Stage 2 based on their Stage 1 performance.
 
 ## TEAM MEMBERS ##
 | Name              | Branch          | Email ID                   |
