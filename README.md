@@ -66,7 +66,7 @@ Top-performing teams will be selected for Stage 2 based on their Stage 1 perform
 
 # Task 0: Python Coding Contest
 
-In this task, we have applied the primary usage of the Python language. This task is a team contest hosted on CodeChef. We have solved  a list of 10 problems:
+In this task, we have applied the primary usage of the Python language. This task is a team contest hosted on CodeChef. We have solved  a list of 10 problems. A total of 1475 teams registered for this coding contest:
 
 | # | Problem Description                                  | Code        | Points | Success Rate |
 |---|------------------------------------------------------|-------------|--------|--------------|
@@ -79,6 +79,7 @@ In this task, we have applied the primary usage of the Python language. This tas
 | 7 | Calculate the distance between 2 points               | DIST1_PY    | 1328   | 43.3%        |
 | 8 | Find the Toppers                                      | SCOR_PY     | 1312   | 43.77%       |
 | 9 | Manage the Inventory                                   | INV_PY      | 1279   | 35.42%       |
+| 10 |   Slice the list                                 |   SLICE1_PY   |  1220     |  32.89      |
 
 
 
