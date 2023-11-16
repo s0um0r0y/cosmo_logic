@@ -185,9 +185,7 @@ This should open the Gazebo application with the mobile robot (named as ebot) sp
 
 ## 1. Computer Vision
 
-Certainly! Here's the modified content for your GitHub README file:
 
-```markdown
 # Learning Resources for Task 1: Computer Vision with OpenCV
 
 ## 1. Computer Vision
@@ -223,8 +221,6 @@ To get started, make sure to install the necessary libraries:
 ### Understanding Aruco Markers:
 
 An Aruco marker, when viewed in an image, is a quadrilateral shape defined by some set of pixels. The properties of the shape, such as corners, area, length of sides, diagonals, medians, and bisectors, can be utilized for various applications.
-
-Take note that Aruco markers are quadrilaterals rather than squares, as evident in the image above.
 
 ### Application:
 
