@@ -12,6 +12,29 @@ The “Cosmo Logistic” theme of eYRC 2023-24 is set in a warehouse used for in
 
 We have learnt to navigate this mobile robot with the help of SLAM (simultaneous localization and mapping) method in a warehouse. We have detected and localised the packages placed on racks, and manipulated the robotic arm to pick them up. In stage 1 of the competition, our team  completed this theme in a simulator (Gazebo).
 
+# Project Overview
+
+## Learnings
+- Robot Operating System 2 (ROS 2)
+- Gazebo
+- MoveIt 2
+- Computer Vision
+- Git
+- RViz 2
+- Nav 2
+
+## Implementation
+Simulator + Real Industrial Robot (Remote Access)
+
+## System Requirements
+- **Operating System:** Ubuntu 22.04 LTS
+- **Processor:** Eight cores, x86_64 (64-bit x86 Instruction Set)
+- **Storage:** HDD or SSD with at least 50GB of space
+- **RAM:** 8GB or more
+- **Graphics Card:** Dedicated graphics card preferred
+- **Internet:** Minimum speed of 5 Mbps & latency <= 50ms
+
+
 ## TEAM MEMBERS ##
 | Name              | Branch          | Email ID                   |
 |-------------------|-----------------|----------------------------|
