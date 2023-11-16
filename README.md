@@ -52,6 +52,24 @@ Stage 1 is divided into three tasks: Task 0, Task 1, and Task 2. All the tasks w
 
 Top-performing teams will be selected for Stage 2 based on their Stage 1 performance.
 
+# Learnings and Tasks
+
+| #   | Task              | Start Date | End Date   | Duration  |
+| --- | ----------------- | ---------- | ---------- | --------- | 
+| 1   | Task 0            | 05 Sep 2023 | 18 Sep 2023 | 2 Weeks   | 
+| 2   | Coding Contest    | 05 Sep 2023 | 01 Oct 2023 | ~4 Weeks  | 
+| 3   | Task 1A           | 19 Sep 2023 | 16 Oct 2023 | ~4 Weeks  | 
+| 4   | Task 1B           | 19 Sep 2023 | 16 Oct 2023 | ~4 Weeks  | 
+| 5   | Task 1C           | 19 Sep 2023 | 16 Oct 2023 | ~4 Weeks  |
+| 6   | Task 2A           | 17 Oct 2023 | 10 Nov 2023 | ~4 Weeks  | 
+| 7   | Task 2B           | 17 Oct 2023 | 10 Nov 2023 | ~4 Weeks  | 
+
+
+
+
+
+
+
 ## TEAM MEMBERS ##
 | Name              | Branch          | Email ID                   |
 |-------------------|-----------------|----------------------------|
