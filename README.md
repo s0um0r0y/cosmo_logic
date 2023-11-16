@@ -15,7 +15,7 @@ We have learnt to navigate this mobile robot with the help of SLAM (simultaneous
 ## TEAM MEMBERS ##
 | Name              | Branch          | Email ID                   |
 |-------------------|-----------------|----------------------------|
-|Soumo Roy          | ECE       | soumo.roy2021@vitstudent.ac.in    | 
+|Soumo Roy          | ECE       | soumo.roy2021@vitstudent.ac.in    |
 | joel viju                   | ECE        | joelviju.v2021@vitstudent.ac.in    | 
 | anirudh Singareddy    | CSE CORE       | singareddy.anirudh2021@vitstudent.ac.in    | 
 |Rohan Raj    | ECE       | rohan.raj2021@vitstudent.ac.in    | Area of Interest 4       |
