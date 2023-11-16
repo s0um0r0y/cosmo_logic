@@ -173,7 +173,7 @@ ros2 launch ebot_description ebot_gazebo_launch.py
 ```
 
 This should open the Gazebo application with the mobile robot (named as ebot) spawned inside a warehouse.
-![figure2](https://portal.e-yantra.org/themeBook/cl/resources/task_0_gazebo.png)
+![figure2](https://github.com/s0um0r0y/cosmo_logic/blob/main/task_0_gazebo.png)
 
 *This repository contains three packages (as of now):*
 
