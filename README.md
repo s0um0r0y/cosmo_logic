@@ -64,6 +64,21 @@ Top-performing teams will be selected for Stage 2 based on their Stage 1 perform
 | 6   | Task 2A           | 17 Oct 2023 | 10 Nov 2023 | ~4 Weeks  | 
 | 7   | Task 2B           | 17 Oct 2023 | 10 Nov 2023 | ~4 Weeks  | 
 
+# Task 0: Python Coding Contest
+
+In this task, we have applied the primary usage of the Python language. This task is a team contest hosted on CodeChef. We have solved  a list of 10 problems:
+
+| # | Problem Description                                  | Code        | Points | Success Rate |
+|---|------------------------------------------------------|-------------|--------|--------------|
+| 1 | Palindrome                                           | PAL_PY      | 1380   | 58.78%       |
+| 2 | IFs and FORs with Python                              | IFFOR1_PY   | 1352   | 60.53%       |
+| 3 | Arithmetic Progression with Lambda function          | APLAM1_PY   | 1345   | 68.28%       |
+| 4 | Stars in our pattern                                  | STAR_PY     | 1340   | 65.76%       |
+| 5 | Count the Characters in WORDS                         | WLEN_PY     | 1337   | 63.92%       |
+| 6 | Decimal to Binary Converter                           | D2BIN1_PY   | 1329   | 65.6%        |
+| 7 | Calculate the distance between 2 points               | DIST1_PY    | 1328   | 43.3%        |
+| 8 | Find the Toppers                                      | SCOR_PY     | 1312   | 43.77%       |
+| 9 | Manage the Inventory                                   | INV_PY      | 1279   | 35.42%       |
 
 
 
