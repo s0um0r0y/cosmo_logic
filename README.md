@@ -185,6 +185,13 @@ This should open the Gazebo application with the mobile robot (named as ebot) sp
 
 ## 1. Computer Vision
 
+Certainly! Here's the modified content for your GitHub README file:
+
+```markdown
+# Learning Resources for Task 1: Computer Vision with OpenCV
+
+## 1. Computer Vision
+
 Welcome to the learning resources for Task 1! In this section, we'll guide you through the essentials of computer vision using the OpenCV library.
 
 ### Resources:
@@ -205,17 +212,26 @@ To get started, make sure to install the necessary libraries:
 - **Install "pip3":**
   ```bash
   sudo apt install python3-pip
-Install "OpenCV2 Python and Numpy":
-pip3 install opencv-contrib-python==4.7.0.72
-pip3 install numpy==1.21.5
+  ```
 
-Understanding Aruco Markers:
+- **Install "OpenCV2 Python and Numpy":**
+  ```bash
+  pip3 install opencv-contrib-python==4.7.0.72
+  pip3 install numpy==1.21.5
+  ```
+
+### Understanding Aruco Markers:
+
 An Aruco marker, when viewed in an image, is a quadrilateral shape defined by some set of pixels. The properties of the shape, such as corners, area, length of sides, diagonals, medians, and bisectors, can be utilized for various applications.
 
 Take note that Aruco markers are quadrilaterals rather than squares, as evident in the image above.
 
-Application:
+### Application:
+
 The idea is to leverage OpenCV to discover properties of the Aruco marker's position and orientation. Apply your logic to determine the pose of the Aruco marker, enabling the publication of transforms between the Aruco object and the base_link of the robot arm.
+
+
+
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
