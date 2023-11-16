@@ -98,7 +98,7 @@ This task is divided into three parts:
 - Install and build the required packages for this theme.
 - Start exploring the robot environment in Gazebo.
 
-Task Objective:
+# Warehouse Setup Instructions
 In this task, your mission is not to construct a robot from the ground up. Instead, you will be provided with a mobile robot model. Your goal is to perform the robot unboxing ceremony and prepare it for subsequent tasks. Proceed to the task instructions to set up your workspace and ready your robot for its grand debut in the interstellar realm.
 
 1. Problem Statement:
