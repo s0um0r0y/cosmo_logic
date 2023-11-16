@@ -1,4 +1,4 @@
-# cosmo_logic
+# eYRC --- e-Yantra Robotics Competition 2023 --- Cosmo Logistic (CL).
 eyrc-23 cosmo logic theme
 someone help us pls!! :(((
 
