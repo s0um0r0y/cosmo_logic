@@ -98,23 +98,17 @@ This task is divided into three parts:
 - Install and build the required packages for this theme.
 - Start exploring the robot environment in Gazebo.
 
-Certainly! Below is the properly structured content for your GitHub README file:
+Task Objective:
+In this task, your mission is not to construct a robot from the ground up. Instead, you will be provided with a mobile robot model. Your goal is to perform the robot unboxing ceremony and prepare it for subsequent tasks. Proceed to the task instructions to set up your workspace and ready your robot for its grand debut in the interstellar realm.
 
-```markdown
-# Task 1: Robot Unboxing Ceremony - Cosmo Logistic Theme
-
-**Task Objective:**
-In this task, the mission is not to construct a robot from the ground up. Instead, you will be provided with a mobile robot model. Your goal is to perform the robot unboxing ceremony and prepare it for subsequent tasks. Proceed to the task instructions to set up your workspace and ready your robot for its grand debut in the interstellar realm.
-
-## 1. Problem Statement
+1. Problem Statement:
 The task's objective is to configure the simulation of the warehouse world for the Cosmo Logistic theme on your system. Ensure that the world is properly set up with the required packages.
 
-## 2. Procedure
-
-### Build Packages
+2. Procedure:
+**Build Packages:**
 Begin by creating a workspace; refer to the link for instructions on how to do so. Once completed, compile and source the packages.
 
-### Clone the Cosmo Logistic (CL) Repository
+**Clone the Cosmo Logistic (CL) Repository:**
 Navigate to your colcon_ws directory and clone the Cosmo Logistic theme repository (Ensure the src folder is empty):
 
 ```bash
@@ -123,7 +117,7 @@ git clone https://github.com/eYantra-Robotics-Competition/eYRC-2023_Cosmo_Logist
 git checkout tags/v1.0.1 .
 ```
 
-**Note:** After task 0, to return to the remaining tasks, use `git checkout main`. For users without git installed, use the following command for installation:
+Note: After task 0, to return to the remaining tasks, use `git checkout main`. For users without git installed, use the following command for installation:
 
 ```bash
 sudo apt install git
@@ -131,7 +125,7 @@ sudo apt install git
 
 The Cosmo Logistic package may take some time to clone, depending on your internet speed.
 
-### Install Additional Packages
+**Install Additional Packages:**
 Before building the workspace and applying gazebo changes, use the following commands:
 
 ```bash
@@ -148,14 +142,16 @@ source ~/.bashrc      # source bashrc as we have made changes
 
 Navigate to the colcon_ws directory and build the colcon workspace using the colcon build command.
 
-**Note:** To build the package in the system, ensure that the terminal is pointing at the ~/colcon_ws directory and not in ~/colcon_ws/src.
+Note: To build the package in the system, ensure that the terminal is pointing at the ~/colcon_ws directory and not in ~/colcon_ws/src.
 
 ```bash
 cd ~/colcon_ws
 colcon build
 ```
 
-The setup is now complete! After the package has been successfully built, do not forget to source it:
+The setup is now complete!
+
+After the package has been successfully built, do not forget to source it:
 
 ```bash
 source install/setup.bash
@@ -170,7 +166,6 @@ echo "source ~/colcon_ws/install/setup.bash" >> ~/.bashrc
 source ~/.bashrc      # source bashrc as we have made changes
 ```
 
-### Run Task 0 Launch File
 To run the task 0 launch file, enter:
 
 ```bash
@@ -182,11 +177,8 @@ This should open the Gazebo application with the mobile robot (named as ebot) sp
 *This repository contains three packages (as of now):*
 
 - `aws-robomaker-small-warehouse-world`: Contains warehouse rack and package models
-- `ebot_description`: Contains the mobile robot (ebot) description model
+- `ebot_description`: Contains mobile robot (ebot) description model
 - `eyantra_warehouse`: Contains the warehouse world model
-```
-
-Feel free to use this Markdown code in your GitHub README file. It provides a well-structured and organized presentation of the information for Task 1.
 
 
 
