@@ -206,10 +206,9 @@ To get started, make sure to install the necessary libraries:
   ```bash
   sudo apt install python3-pip
 Install "OpenCV2 Python and Numpy":
-bash
-Copy code
 pip3 install opencv-contrib-python==4.7.0.72
 pip3 install numpy==1.21.5
+
 Understanding Aruco Markers:
 An Aruco marker, when viewed in an image, is a quadrilateral shape defined by some set of pixels. The properties of the shape, such as corners, area, length of sides, diagonals, medians, and bisectors, can be utilized for various applications.
 
