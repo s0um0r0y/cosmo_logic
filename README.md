@@ -245,9 +245,6 @@ Manipulate the robotic arm using the Moveit framework.
 
 ### 1C: Autonomous Navigation using Nav2
 Navigate eBot in the Gazebo environment using Nav2.
-```
-
-Feel free to incorporate this content into your GitHub README file. It provides clear instructions for updating the repository and setting up for Task 1, along with an overview of the subtasks in Task 1.
 
 # Learning Resources for Task 1: Computer Vision with OpenCV
 
