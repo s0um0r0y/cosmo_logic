@@ -971,6 +971,51 @@ In Task 1B, your objective is to perform motion planning for the UR5 robotic arm
    - Explain any key decisions or considerations in your approach.
 
 
+# Task 1B - Instructions
+
+**Note: Before attempting the task, make sure you have gone through the learning resources on the manipulation of robotic arm.**
+
+### Task Objective:
+
+In Task 1B, your objective is to create a Python script to control the UR5 robotic arm's movement to pick and drop objects in a specified order. You will be moving the arm to Pick Position 1 (P1), Drop Position (D), and Pick Position 2 (P2).
+
+### Instructions:
+
+1. **Launch Gazebo and Moveit:**
+   - Start Gazebo waiting for UR5 to spawn using the following command:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+   - Use the launch file created during the Moveit setup assistant, i.e., `spawn_ur5_launch_moveit.launch.py`, to spawn the UR5 arm in Gazebo and RViz:
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch_moveit.launch.py
+     ```
+
+2. **Write the Python Script:**
+   - Create a single Python script that moves the UR5 arm in the specified order: P1 → D → P2 → D.
+   - You are free to use the servoing method, or let Moveit plan (actuate directly by giving pose or joint angles using move_group action), or a combination of both.
+   - Feel free to add any intermediate poses if needed to achieve the completion of the task.
+
+3. **Run the Python Script:**
+   - Start your Python script to execute the arm movements:
+
+     ```bash
+     ros2 run ur_description task1b.py
+     ```
+
+   - Ensure that the arm moves in the correct sequence (P1 → D → P2 → D).
+
+4. **Documentation:**
+   - In your README file, document the logic and approach used in your Python script.
+   - Explain any key decisions or considerations made during the arm manipulation.
+   - Include any challenges faced and how you addressed them.
+
+5. **Visualization:**
+   - Visualize the arm movements in RViz to ensure they align with the specified positions.
+
 
 
 
