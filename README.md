@@ -827,6 +827,73 @@ The goal of this task is to perform pose estimation of package boxes using Aruco
 
 ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/task1a_arena.png)
 
+# Task 1A - Instructions
+
+**Objective:**
+The objective of this task is to develop a Python script for detecting Aruco markers on package boxes using RGB and Depth image data from the robot's camera. The script should publish the transform between the Aruco marker's center position and the `base_link` frame of the robot arm. Additionally, the detected Aruco tags and their center points should be displayed on the RGB image using the OpenCV library.
+
+**Instructions:**
+
+1. **Boilerplate Script:**
+   - Start with the provided boilerplate script named `task1a.py` located in the `scripts` folder of the `ur_description` package. This script provides guidance on the steps and instructions to complete Task 1A.
+
+2. **Dependencies Installation:**
+   - Ensure that the required ROS packages are installed by running the following command in the terminal:
+
+     ```bash
+     sudo apt-get install ros-humble-joint-state-broadcaster ros-humble-joint-trajectory-controller ros-humble-controller-manager
+     ```
+
+3. **Environment Setup:**
+   - Launch the robot in Gazebo and open RViz by running the following commands in separate terminals:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch.py
+     ```
+
+   - Keep these terminals running.
+
+4. **Run the Python Script:**
+   - Execute your Task 1A Python script in a new terminal. Replace the package name and filename if you are not using the provided boilerplate script.
+
+     ```bash
+     ros2 run ur_description task1a.py
+     ```
+
+5. **Visualization in RViz:**
+   - In RViz:
+     - Set the fixed frame as "world."
+     - Add a new display or press Ctrl + N.
+     - Select "TF" in the "By display type" section.
+     - Add "PointCloud2" from the "By display type" section.
+
+   - You will see all TF frames published on the "world" frame. Uncheck 'All Enabled' and only select `obj_<marker_id>` (the final box frame you are publishing) in the TF frames list.
+
+6. **Expected Output:**
+   - Compare the execution of your Python script with TF in RViz. The RViz window should display the Aruco marker's transform in relation to the robot arm's `base_link` frame.
+
+   - The script should also display Aruco tags and their center points on the RGB image.
+
+7. **Documentation:**
+   - Ensure that your code is well-documented, explaining the logic behind Aruco marker detection and pose estimation.
+
+8. **Testing and Validation:**
+   - Test the script on different scenarios within the warehouse.
+   - Validate the accuracy of the detected poses.
+
+
+10. **Additional Notes:**
+   - Use OpenCV2 for image processing. Other libraries can be chosen if confident but may not receive support from the e-Yantra team.
+   - Handle duplicate boxes with the same Aruco IDs to avoid processing boxes that are not in the reach of the robot arm.
+
+
+
+Best of luck with your implementation! If you have any questions or need assistance, feel free to reach out.
+
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
 |---------|------------------------|--------|-----------------------------------------|
