@@ -562,7 +562,42 @@ Now that we have seen how to use Setup assistant and visualize the movement of t
    # controller performance. It essentially increases the timestep when calculating the target pose, to move the target
    # pose farther away. [seconds]
   
+It seems like you want to control the UR5 robotic arm using Rviz. Below are the instructions to do so:
 
+1. **Launch Gazebo and UR5 Gazebo Spawner:**
+   First, you need to launch Gazebo along with the UR5 Gazebo spawner. Open a terminal and run the following command:
+
+   ```bash
+   ros2 launch ur_description ur5_gazebo_launch.py
+   ```
+
+   This will start Gazebo and load the UR5 robot.
+
+2. **Launch MoveIt! and UR5 MoveIt Spawner:**
+   After launching Gazebo, open a new terminal and run the command:
+
+   ```bash
+   ros2 launch ur5_moveit spawn_ur5_launch_moveit.launch.py
+   ```
+
+   This will launch MoveIt! along with the UR5 MoveIt spawner.
+
+3. **Visualize in Rviz:**
+   After launching both Gazebo and MoveIt!, you can visualize the UR5 in Rviz. Open a new terminal and run:
+
+   ```bash
+   ros2 launch ur5_moveit demo.launch.py
+   ```
+
+   This command will open Rviz and you should be able to see the UR5 robot model. You can interact with the robot in Rviz to plan and execute motions.
+
+4. **Add Visualization Tools:**
+   As mentioned in the note, you need to add other visualization tools to Rviz. Here are the steps to add tools:
+   - Click on the "Panels" tab in Rviz.
+   - Select "MoveIt" from the drop-down menu.
+   - A MoveIt MotionPlanning plugin panel should appear. You can use this panel to plan and execute motions for the UR5.
+
+With these steps, you should be able to control the UR5 robotic arm using Rviz and MoveIt!. Make sure to follow the instructions carefully, and let me know if you encounter any issues.
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
 |---------|------------------------|--------|-----------------------------------------|
