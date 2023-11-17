@@ -653,7 +653,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    
 ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/ebot_nav2_pkg.png)
 
-3. **Check SLAM-Toolbox Installation:**
+2. **Check SLAM-Toolbox Installation:**
    Ensure that SLAM-Toolbox is installed:
 
    ```bash
@@ -666,7 +666,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    sudo apt install ros-humble-slam-toolbox
    ```
 
-4. **Set SLAM-Toolbox Parameters:**
+3. **Set SLAM-Toolbox Parameters:**
    Set the parameters for SLAM-Toolbox in the file `mapper_params_online_async.yaml` located in the directory `/ebot_nav2/config/`.
 
    ```yaml
@@ -678,7 +678,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    mode: mapping
    ```
 
-5. **Load Parameters and Add SLAM-Toolbox Node:**
+4. **Load Parameters and Add SLAM-Toolbox Node:**
    Load the `mapper_params_online_async.yaml` file and add the SLAM-Toolbox node in the `ebot_bringup_launch.py` launch file located in the directory `/ebot_nav2/launch/`. Ensure that it's already added in the launch file.
 
    ```python
@@ -697,7 +697,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    )
    ```
 
-6. **Add Launch Configuration Object:**
+5. **Add Launch Configuration Object:**
    Add the following lines as the object of `LaunchDescription()` in the same launch file, at the end.
 
    ```python
@@ -707,7 +707,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
 
    Save the file.
 
-7. **Launch eBot in Gazebo, Teleop, and Navigation:**
+6. **Launch eBot in Gazebo, Teleop, and Navigation:**
    Launch the required components:
 
    ```bash
