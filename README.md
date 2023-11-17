@@ -779,6 +779,51 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
 
 ---
 
+# Task 1A - Object Pose Estimation
+
+## Task Objective:
+The goal of this task is to perform pose estimation of package boxes using Aruco marker detection. The task involves locating package boxes in a warehouse using computer vision, specifically Aruco detection. Each package box is equipped with a unique Aruco marker. The objective is to selectively identify boxes within the robot arm's reach. Follow the instructions to set up your workspace and prepare the robotic arm for its first movement.
+
+## Instructions:
+
+### 1. **Prepare Your Workspace:**
+   Set up your ROS workspace and ensure all necessary dependencies are installed.
+
+### 2. **Robot Arm and Warehouse Environment:**
+   You will be provided with a UR5 robotic arm model situated in a warehouse. The warehouse contains racks and package boxes. The task involves detecting the Aruco markers on these boxes.
+
+### 3. **Aruco Marker Detection:**
+   - Utilize the OpenCV library to detect Aruco markers on the package boxes.
+   - Implement logic to differentiate between different markers and uniquely identify each package box.
+
+### 4. **Pose Estimation:**
+   - Once Aruco markers are detected, employ pose estimation techniques to determine the position and orientation of each package box.
+   - The goal is to calculate the transformation between the Aruco marker's center position on the package box and the `base_link` of the robot arm.
+
+### 5. **Visualization in RViz:**
+   - Publish the calculated transform between Aruco marker centers and the `base_link` of the robot arm.
+   - Visualize the detected package boxes and their poses in RViz for verification.
+
+### 6. **Logical Mathematics:**
+   - Apply logical and mathematical reasoning to ensure accurate pose estimation.
+   - Handle different orientations, distances, and configurations of the Aruco markers.
+
+### 7. **Documentation:**
+   - Clearly document your code, explaining the logic behind marker detection and pose estimation.
+   - Provide details on the mathematical concepts used for pose estimation.
+
+### 8. **Testing and Validation:**
+   - Test the pose estimation on different scenarios within the warehouse.
+   - Validate the accuracy of the detected poses by comparing them with ground truth if available.
+
+### 9. **Submission:**
+   - Submit your well-documented code along with any supporting files.
+   - Include instructions on how to run and test your code.
+
+### 10. **Additional Challenge (Optional):**
+   - Implement a method to dynamically update the pose estimation as the robot arm moves or as the environment changes.
+   - Explore advanced computer vision techniques for more robust detection and pose estimation.
+
 
 
 
