@@ -562,7 +562,7 @@ Now that we have seen how to use Setup assistant and visualize the movement of t
    # controller performance. It essentially increases the timestep when calculating the target pose, to move the target
    # pose farther away. [seconds]
   
-It seems like you want to control the UR5 robotic arm using Rviz. Below are the instructions to do so:
+
 
 1. **Launch Gazebo and UR5 Gazebo Spawner:**
    First, you need to launch Gazebo along with the UR5 Gazebo spawner. Open a terminal and run the following command:
@@ -596,8 +596,56 @@ It seems like you want to control the UR5 robotic arm using Rviz. Below are the 
    - Click on the "Panels" tab in Rviz.
    - Select "MoveIt" from the drop-down menu.
    - A MoveIt MotionPlanning plugin panel should appear. You can use this panel to plan and execute motions for the UR5.
+  
 
-With these steps, you should be able to control the UR5 robotic arm using Rviz and MoveIt!. Make sure to follow the instructions carefully, and let me know if you encounter any issues.
+
+With these steps, you should be able to control the UR5 robotic arm using Rviz and MoveIt!. Make sure to follow the instructions carefully.
+
+Certainly! Here's the modified content for your README file:
+
+---
+
+## Installation Instructions for Navigation (Nav2) and SLAM Toolbox
+
+### Installations
+
+**1. [Nav2](https://navigation.ros.org/index.html):**
+
+   Install the Nav2 packages using your operating system’s package manager:
+
+   ```bash
+   sudo apt install ros-humble-navigation2
+   sudo apt install ros-humble-nav2-bringup
+   ```
+
+**2. [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox):**
+
+   Install the SLAM Toolbox that will be used to build the map and can also be used for localization:
+
+   ```bash
+   sudo apt install ros-humble-slam-toolbox
+   ```
+
+**3. [Robot-localization](http://docs.ros.org/en/melodic/api/robot_localization/html/index.html):**
+
+   Install the robot-localization, a collection of state estimation nodes, each of which is an implementation of a nonlinear state estimator for robots moving in 2D or 3D space:
+
+   ```bash
+   sudo apt install ros-humble-robot-localization
+   ```
+
+**4. Others:**
+
+   Additional tools for your robotic setup:
+
+   ```bash
+   sudo apt install ros-humble-joint-state-publisher-gui
+   sudo apt install ros-humble-xacro
+   ```
+
+---
+
+Feel free to adjust the formatting or add any additional information if needed.
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
 |---------|------------------------|--------|-----------------------------------------|
