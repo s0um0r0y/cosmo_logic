@@ -601,8 +601,6 @@ Now that we have seen how to use Setup assistant and visualize the movement of t
 
 With these steps, you should be able to control the UR5 robotic arm using Rviz and MoveIt!. Make sure to follow the instructions carefully.
 
-Certainly! Here's the modified content for your README file:
-
 ---
 
 ## Installation Instructions for Navigation (Nav2) and SLAM Toolbox
@@ -645,7 +643,83 @@ Certainly! Here's the modified content for your README file:
 
 ---
 
-Feel free to adjust the formatting or add any additional information if needed.
+
+---
+
+## Mapping Using SLAM-Toolbox in ebot_nav2 Package
+
+1. **Clone the Repository:**
+   First, pull the latest repository of eYRC-2023_Cosmo_Logistic into your workspace. Check for the package `ebot_nav2` and verify the file structure.
+
+2. **Check SLAM-Toolbox Installation:**
+   Ensure that SLAM-Toolbox is installed:
+
+   ```bash
+   ros2 pkg list | grep slam_toolbox
+   ```
+
+   If not installed, run the following command:
+
+   ```bash
+   sudo apt install ros-humble-slam-toolbox
+   ```
+
+3. **Set SLAM-Toolbox Parameters:**
+   Set the parameters for SLAM-Toolbox in the file `mapper_params_online_async.yaml` located in the directory `/ebot_nav2/config/`.
+
+   ```yaml
+   # ROS Parameters
+   odom_frame: odom
+   map_frame: map
+   base_frame: base_footprint
+   scan_topic: /scan
+   mode: mapping
+   ```
+
+4. **Load Parameters and Add SLAM-Toolbox Node:**
+   Load the `mapper_params_online_async.yaml` file and add the SLAM-Toolbox node in the `ebot_bringup_launch.py` launch file located in the directory `/ebot_nav2/launch/`. Ensure that it's already added in the launch file.
+
+   ```python
+   # Loading the params
+   declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
+       'async_param',
+       default_value=os.path.join(ebot_nav2_dir, 'config', 'mapper_params_online_async.yaml'),
+       description='Set mappers online async param file')
+
+   # Adding SLAM-Toolbox with online_async_launch.py
+   mapper_online_async_param_launch = IncludeLaunchDescription(
+       PythonLaunchDescriptionSource(
+           os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_async_launch.py'),
+       ),
+       launch_arguments=[('slam_params_file', LaunchConfiguration('async_param'))],
+   )
+   ```
+
+5. **Add Launch Configuration Object:**
+   Add the following lines as the object of `LaunchDescription()` in the same launch file, at the end.
+
+   ```python
+   ld.add_action(declare_mapper_online_async_param_cmd)
+   ld.add_action(mapper_online_async_param_launch)
+   ```
+
+   Save the file.
+
+6. **Launch eBot in Gazebo, Teleop, and Navigation:**
+   Launch the required components:
+
+   ```bash
+   ros2 launch ebot_description ebot_gazebo_launch.py
+   ros2 run teleop_twist_keyboard teleop_twist_keyboard
+   ros2 launch ebot_nav2 ebot_bringup_launch.py
+   ```
+
+   You will see the output indicating successful mapping. Move the eBot using `teleop_twist_keyboard` in the warehouse to generate the complete map.
+
+---
+
+
+
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
 |---------|------------------------|--------|-----------------------------------------|
