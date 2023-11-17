@@ -293,6 +293,73 @@ The idea is to leverage OpenCV to discover properties of the Aruco marker's posi
 
 
 
+# ROS Manipulation Setup
+
+*Recommended time for completing the setup: 20-24 hrs*
+
+In this section, we will learn how to use ROS with the MoveIt2! package to control Robotic Manipulators in the Gazebo Simulator. The skills you acquire here can be applied to control real Robotic Manipulators. The code you write will be translated into actions for actual robots.
+
+## Installation of MoveIt and Related Packages
+
+**Note:** Links for each topic are provided as hyperlinks for detailed reference.
+
+1. **MoveIt Package**
+   - [MoveIt Documentation](https://moveit.ros.org/documentation/)
+
+   Install all MoveIt packages, which are binary-built and ready for direct deployment:
+
+   ```bash
+   sudo apt install ros-humble-moveit
+   ```
+
+2. **Joint State Broadcaster Package**
+   - [Joint State Broadcaster Documentation](http://wiki.ros.org/joint_state_publisher)
+
+   This package helps publish joint states to a topic, allowing other dependent nodes to know the state of each joint.
+
+   ```bash
+   sudo apt install ros-humble-joint-state-publisher
+   ```
+
+3. **Joint Trajectory Controller Package**
+   - [Joint Trajectory Controller Documentation](http://wiki.ros.org/joint_trajectory_controller)
+
+   A controller that sends trajectory messages to the robotic arm, specifying joint angle values, velocity, and effort variables.
+
+   ```bash
+   sudo apt install ros-humble-joint-trajectory-controller
+   ```
+
+4. **MoveIt Servo Package**
+   - [MoveIt Servo Documentation](https://moveit.ros.org/)
+
+   This package helps servo the arm using linear velocity input format of a link or actuating all joint angles.
+
+   ```bash
+   sudo apt install ros-humble-moveit-servo
+   ```
+
+5. **Trimesh Package**
+   - [Trimesh Documentation](https://trimsh.org/)
+
+   A Python package for importing mesh files in RViz, enabling the arm to understand environmental collision in its planning scene.
+
+   ```bash
+   pip install trimesh
+   ```
+
+6. **ROS 2 Control CLI Package**
+   - [ROS 2 Control CLI Documentation](https://index.ros.org/p/ros2_control/)
+
+   The ROS 2 control CLI package allows access to each controller in the terminal, similar to accessing ROS 2 topics.
+
+   ```bash
+   sudo apt install ros-humble-ros2controlcli
+   ```
+
+
+
+You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
