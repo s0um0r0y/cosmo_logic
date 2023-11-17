@@ -448,9 +448,7 @@ Feel free to explore different functionalities provided by the RViz plugin to en
 
 You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
 
-Certainly! Here's the content for your GitHub README file:
 
-```markdown
 # Gazebo Interface for ROS Manipulation
 
 **Note: Package & file names, and content of config files might be slightly different.**
