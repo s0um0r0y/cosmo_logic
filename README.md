@@ -678,7 +678,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
 
 4. **Load Parameters and Add SLAM-Toolbox Node:**
    Load the `mapper_params_online_async.yaml` file and add the SLAM-Toolbox node in the `ebot_bringup_launch.py` launch file located in the directory `/ebot_nav2/launch/`. Ensure that it's already added in the launch file.
-
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/ebot_nav2_pkg.png)
    ```python
    # Loading the params
    declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
@@ -715,7 +715,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    ```
 
    You will see the output indicating successful mapping. Move the eBot using `teleop_twist_keyboard` in the warehouse to generate the complete map.
-
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/mapping_init.png)
 ---
 
 
