@@ -893,8 +893,33 @@ The objective of this task is to develop a Python script for detecting Aruco mar
    - Handle duplicate boxes with the same Aruco IDs to avoid processing boxes that are not in the reach of the robot arm.
 
 
+# Task 1A - Additional Notes
 
-Best of luck with your implementation! If you have any questions or need assistance, feel free to reach out.
+**Points to Note:**
+
+1. **Z-Axis Orientation:**
+   - In the image window, the Z-axis is drawn away from the box. However, for practical use in the robot arm's picking motion (Task 1B), the Z-axis in the TF should be oriented towards the box. Ensure that when sending the transform, the Z-axis is inverted, pointing towards the box.
+
+2. **Image Window Annotations:**
+   - Draw Aruco tag borders on the image window.
+   - Mark a small circular dot representing the center position of the tag.
+   - Display the Aruco tag ID along with the tag.
+
+3. **Handling Difficulty:**
+   - There might be package boxes placed at the back of the front rack with Aruco IDs. This is intentionally done to increase the task difficulty. Ensure that your code:
+     - Avoids drawing axes for such package boxes.
+     - Does not send a transform with respect to `base_link` for boxes that are away from the robot arm's reach position.
+
+4. **TF Orientation Example:**
+   - The TF orientation should resemble the example above, with the Z-axis pointing towards the box.
+
+**Implementation Tips:**
+
+- Consider using OpenCV functions to draw Aruco tag borders, center points, and annotations on the image.
+- Be cautious about duplicate Aruco IDs and handle them appropriately.
+- Test your implementation in various scenarios to ensure robustness.
+
+
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
