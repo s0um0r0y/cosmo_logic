@@ -650,7 +650,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
 
 1. **Clone the Repository:**
    First, pull the latest repository of eYRC-2023_Cosmo_Logistic into your workspace. Check for the package `ebot_nav2` and verify the file structure.
-
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/ebot_nav2_pkg.png)
 2. **Check SLAM-Toolbox Installation:**
    Ensure that SLAM-Toolbox is installed:
 
@@ -678,7 +678,7 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
 
 4. **Load Parameters and Add SLAM-Toolbox Node:**
    Load the `mapper_params_online_async.yaml` file and add the SLAM-Toolbox node in the `ebot_bringup_launch.py` launch file located in the directory `/ebot_nav2/launch/`. Ensure that it's already added in the launch file.
-![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/ebot_nav2_pkg.png)
+
    ```python
    # Loading the params
    declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
