@@ -181,6 +181,74 @@ This should open the Gazebo application with the mobile robot (named as ebot) sp
 - `ebot_description`: Contains mobile robot (ebot) description model
 - `eyantra_warehouse`: Contains the warehouse world model
 
+Certainly! Here's the structured content for your GitHub README file:
+
+```markdown
+# Task 1: Repository Update and Setup
+
+Before proceeding with Task 1, make sure to update your repository. If you have already cloned the eYRC - Cosmo Logistics Repo during Task 0, follow these steps. If not, you can directly clone the repo using:
+
+```bash
+git clone https://github.com/eYantra-Robotics-Competition/eYRC-2023_Cosmo_Logistic.git
+```
+
+For those who have made changes and want to preserve them:
+
+1. Navigate inside the `src` folder of your workspace.
+2. Stash your changes using the following command:
+
+```bash
+git stash
+```
+
+3. Pull the updated Task 1 commits from the repo:
+
+```bash
+git pull
+git checkout tags/v1.1.1 . # if doesn't work try `git fetch` and try again
+```
+
+4. Pop your changes from stash:
+
+```bash
+git stash pop
+```
+
+Note:
+
+- For those who haven't changed any files, you can directly run `git pull` and continue.
+- For directly starting with Task 1A.
+
+Next, install required ROS packages for Task 1A:
+
+```bash
+sudo apt-get install ros-humble-joint-state-broadcaster ros-humble-joint-trajectory-controller ros-humble-controller-manager
+```
+
+Do a `colcon build` to build the workspace with the updated packages.
+
+**Note:** After any changes in any files, to reflect the same on the workspace, you need to do `colcon build`.
+
+If you want to skip the step of building every time a file (python script) is changed (note: this doesn't include the addition of files or folders), you may use the `colcon build --symlink-install` parameter with the build command. (Surf over the internet to find more about it)
+
+---
+
+## Task 1: Object Pose Estimation, Arm Manipulation, Autonomous Navigation
+
+This task is divided into three parts:
+
+### 1A: Object Pose Estimation
+Locate Aruco in the world with respect to the robotic arm.
+
+### 1B: Arm Manipulation using Moveit
+Manipulate the robotic arm using the Moveit framework.
+
+### 1C: Autonomous Navigation using Nav2
+Navigate eBot in the Gazebo environment using Nav2.
+```
+
+Feel free to incorporate this content into your GitHub README file. It provides clear instructions for updating the repository and setting up for Task 1, along with an overview of the subtasks in Task 1.
+
 # Learning Resources for Task 1: Computer Vision with OpenCV
 
 ## 1. Computer Vision
