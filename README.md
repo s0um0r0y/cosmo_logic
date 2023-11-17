@@ -302,6 +302,7 @@ In this section, we will learn how to use ROS with the MoveIt2! package to contr
 ## Installation of MoveIt and Related Packages
 
 **Note:** Links for each topic are provided as hyperlinks for detailed reference.
+![figure3](https://github.com/s0um0r0y/cosmo_logic/blob/main/image3.png)
 
 1. **MoveIt Package**
    - [MoveIt Documentation](https://moveit.ros.org/documentation/)
