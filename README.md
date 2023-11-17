@@ -357,6 +357,69 @@ In this section, we will learn how to use ROS with the MoveIt2! package to contr
    sudo apt install ros-humble-ros2controlcli
    ```
 
+# MoveIt Setup Assistant for ROS 2
+
+**Note:** [MoveIt Setup Assistant Link for ROS 2 Humble](<Add_Link_Here>) (Check for any typos on the webpage)
+
+The MoveIt Setup Assistant is a graphical user interface for configuring any robot for use with MoveIt. Its primary function is generating a Semantic Robot Description Format (SRDF) file for your robot, which specifies additional information required by MoveIt such as planning groups, end effectors, and various kinematic parameters. Additionally, it generates other necessary configuration files for use with the MoveIt pipeline. To use the MoveIt Setup Assistant, you will need to have a URDF file for your robot. [Source Link](<Add_Source_Link_Here>)
+
+You can skip the steps not shown in the below information. We highly encourage you to explore the internet for more detailed concepts.
+
+1. **Start:**
+   (Make sure to source the workspace in the terminal before starting these steps)
+
+   ```bash
+   ros2 launch moveit_setup_assistant setup_assistant.launch.py
+   ```
+   This command will open a window with the GUI of the setup assistant.
+
+2. **Select the URDF file of the robotic arm:**
+   - Click on "Create New Moveit Configuration Package."
+   - Select the URDF file of the UR5 arm named as `ur5_arm.urdf.xacro` from the `ur_description/urdf` package.
+     **Note:** Make sure to select only `ur5_arm.urdf.xacro` and NOT any other xacro file.
+   - Click on the "Load Files" button to load the URDF file.
+
+3. **Generate Self-Collision Matrix:**
+   (Make sure to keep the bar of sampling density to its maximum value.)
+   - Click on the "Self-Collisions" pane selector on the left-hand side.
+   - Click on the "Generate Collision Matrix" button. The Setup Assistant will work for a few seconds before presenting you the results of its computation in the main table.
+
+4. **Add Virtual Joints:**
+   Virtual joints are used primarily to attach the robot to the world. Add two virtual joints:
+   - FixedBase: for `base_link` having parent link as `world`
+   - CamBase: for `camera_link` having parent link as `world`
+
+5. **Add Planning Groups:**
+   Planning groups are used to semantically describe different parts of your robot.
+   - Click on "Add Group" button and provide details to resemble more with hardware.
+     - Group Name: `ur_manipulator`
+     - Kinematics solver: `KDLKinematicPlugin`
+     - Click on "Add Joints" and add the specified joints.
+     - Add links as shown.
+     - Add a chain by selecting `base_link` as `base_link` and `tool0` as `tool0`.
+     The final planning group setup should look like the provided window.
+
+6. **Label End Effectors:**
+   - Add an end effector with the following info:
+     - EEF Name: `gripper`
+     - Select Group Name: `ur_manipulator`
+     - Parent Link: `tool0`
+
+7. **Checking ros2_control:**
+   - Make sure that ros2_control has position for `command_interface` and position, velocity for `position_interface`.
+
+8. **Add Author Information:**
+   - Click on the "Author Information" pane.
+   - Enter your name and email address.
+
+9. **Generate Configuration Files:**
+   - Click on the "Configuration Files" pane.
+   - Choose a location and name for the ROS package that will be generated containing your new set of configuration files.
+   - Click on "Generate Package."
+   - The Setup Assistant will generate and write a set of launch and config files into the directory of your choosing.
+
+All the generated files will appear in the "Generated Files/Folders" tab, and you can click on each of them for a description of what they contain. Finally, you can exit the setup assistant.
+
 
 
 You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
