@@ -448,6 +448,123 @@ Feel free to explore different functionalities provided by the RViz plugin to en
 
 You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
 
+Certainly! Here's the content for your GitHub README file:
+
+```markdown
+# Gazebo Interface for ROS Manipulation
+
+**Note: Package & file names, and content of config files might be slightly different.**
+
+Now that we have seen how to use Setup assistant and visualize the movement of the arm in Rviz, let's find out how to simulate it in Gazebo. To make the arm move on Gazebo, we need an interface that will take the commands from MoveIt and convey it to the arm in simulation. This interface, in this scenario, is a controller. The controller is basically a generic control loop feedback mechanism, typically a PID controller, to control the output sent to your actuators.
+
+## ROS Controllers Configuration
+
+1. **ROS Controllers Configuration**
+   
+   A configuration file called `ros_controllers.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ros_controllers.yaml
+
+   controller_manager:
+     ros__parameters:
+       update_rate: 2000
+       joint_trajectory_controller:
+         type: joint_trajectory_controller/JointTrajectoryController
+       joint_state_broadcaster:
+         type: joint_state_broadcaster/JointStateBroadcaster
+
+   joint_trajectory_controller:
+     ros__parameters:
+       command_interfaces:
+         - position
+       state_interfaces:
+         - position
+         - velocity
+       joints:
+         - elbow_joint
+         - shoulder_lift_joint
+         - shoulder_pan_joint
+         - wrist_1_joint
+         - wrist_2_joint
+         - wrist_3_joint
+       state_publish_rate: 100.0
+       action_monitor_rate: 20.0
+       allow_partial_joints_goal: false
+       constraints:
+         stopped_velocity_tolerance: 0.0
+         goal_time: 0.0
+
+   joint_state_broadcaster:
+     ros__parameters:
+       type: joint_state_broadcaster/JointStateBroadcaster
+   ```
+
+2. **MoveIt Controllers Configuration**
+
+   A configuration file called `moveit_controllers.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # moveit_controllers.yaml
+
+   controller_names:
+     - joint_trajectory_controller
+
+   joint_trajectory_controller:
+     action_ns: follow_joint_trajectory
+     type: FollowJointTrajectory
+     default: true
+     joints:
+       - shoulder_pan_joint
+       - shoulder_lift_joint
+       - elbow_joint
+       - wrist_1_joint
+       - wrist_2_joint
+       - wrist_3_joint
+   ```
+
+3. **OMPL Planning Configuration**
+
+   A configuration file called `ompl_planning.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ompl_planning.yaml
+
+   planning_plugin: 'ompl_interface/OMPLPlanner'
+   request_adapters: >-
+       default_planner_request_adapters/AddTimeOptimalParameterization
+       default_planner_request_adapters/FixWorkspaceBounds
+       default_planner_request_adapters/FixStartStateBounds
+       default_planner_request_adapters/FixStartStateCollision
+       default_planner_request_adapters/FixStartStatePathConstraints
+   start_state_max_bounds_error: 0.1
+   ```
+
+4. **Servo Information Configuration**
+
+   A configuration file called `ur_servo.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ur_servo.yaml
+
+   ###############################################
+   # Modify all parameters related to servoing here
+   ###############################################
+   use_gazebo: true # Whether the robot is started in a Gazebo simulation environment
+
+   ## Properties of incoming commands
+   command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
+   scale:
+     # Scale parameters are only used if command_in_type=="unitless"
+     linear:  0.6  # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
+     rotational:  0.3 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
+     # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
+     joint: 0.01
+   # This is a fudge factor to account for any latency in the system, e.g. network latency or poor low-level
+   # controller performance. It essentially increases the timestep when calculating the target pose, to move the target
+   # pose farther away. [seconds]
+  
+
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
 |---------|------------------------|--------|-----------------------------------------|
