@@ -359,9 +359,9 @@ In this section, we will learn how to use ROS with the MoveIt2! package to contr
 
 # MoveIt Setup Assistant for ROS 2
 
-**Note:** [MoveIt Setup Assistant Link for ROS 2 Humble](<Add_Link_Here>) (Check for any typos on the webpage)
 
-The MoveIt Setup Assistant is a graphical user interface for configuring any robot for use with MoveIt. Its primary function is generating a Semantic Robot Description Format (SRDF) file for your robot, which specifies additional information required by MoveIt such as planning groups, end effectors, and various kinematic parameters. Additionally, it generates other necessary configuration files for use with the MoveIt pipeline. To use the MoveIt Setup Assistant, you will need to have a URDF file for your robot. [Source Link](<Add_Source_Link_Here>)
+
+The MoveIt Setup Assistant is a graphical user interface for configuring any robot for use with MoveIt. Its primary function is generating a Semantic Robot Description Format (SRDF) file for your robot, which specifies additional information required by MoveIt such as planning groups, end effectors, and various kinematic parameters. Additionally, it generates other necessary configuration files for use with the MoveIt pipeline. To use the MoveIt Setup Assistant, you will need to have a URDF file for your robot. 
 
 You can skip the steps not shown in the below information. We highly encourage you to explore the internet for more detailed concepts.
 
