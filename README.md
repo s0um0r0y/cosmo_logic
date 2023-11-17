@@ -875,9 +875,11 @@ The objective of this task is to develop a Python script for detecting Aruco mar
 
 6. **Expected Output:**
    - Compare the execution of your Python script with TF in RViz. The RViz window should display the Aruco marker's transform in relation to the robot arm's `base_link` frame.
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img5.png)
 
    - The script should also display Aruco tags and their center points on the RGB image.
-
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img6.png)
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img7.png)
 7. **Documentation:**
    - Ensure that your code is well-documented, explaining the logic behind Aruco marker detection and pose estimation.
 
