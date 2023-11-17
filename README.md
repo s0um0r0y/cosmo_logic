@@ -825,7 +825,7 @@ The goal of this task is to perform pose estimation of package boxes using Aruco
    - Explore advanced computer vision techniques for more robust detection and pose estimation.
 
 
-
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/task1a_arena.png)
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
