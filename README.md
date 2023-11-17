@@ -919,6 +919,60 @@ The objective of this task is to develop a Python script for detecting Aruco mar
 - Be cautious about duplicate Aruco IDs and handle them appropriately.
 - Test your implementation in various scenarios to ensure robustness.
 
+# Task 1B - Instructions
+
+**Note: Before attempting the task, make sure you have gone through the learning resources on robotic arm manipulation and Moveit framework.**
+
+### Task Objective:
+
+In Task 1B, your objective is to perform motion planning for the UR5 robotic arm using the Moveit framework. The task involves reaching specific positions or joint angles to prepare the arm for the future task of picking boxes from racks.
+
+### Instructions:
+
+1. **Launch the Environment:**
+   - First, launch the UR5 robot in Gazebo along with RViz. Use the following commands in separate terminals:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch.py
+     ```
+
+2. **Run the Moveit Configuration Script:**
+   - Run the Moveit configuration script to configure the Moveit framework for the UR5 robot. Use the following command:
+
+     ```bash
+     ros2 launch ur5_moveit_config ur5_moveit_planning_execution.launch.py sim:=true
+     ```
+
+3. **Launch RViz:**
+   - Open RViz to visualize the robot model and the motion planning process:
+
+     ```bash
+     ros2 launch ur5_moveit_config moveit_rviz.launch.py config:=true
+     ```
+
+4. **Run the Python Script:**
+   - Use a Python script to command the UR5 arm to reach specific positions or joint angles. You can write a script that utilizes the Moveit Python API or use the MoveGroupCommander for Python. For example:
+
+     ```bash
+     ros2 run ur5_moveit_config move_group_python_interface.py
+     ```
+
+   - Ensure that your Python script contains the necessary logic to plan and execute arm movements.
+
+5. **Visualize the Motion:**
+   - In RViz, you should be able to visualize the planned motion of the UR5 arm. Make sure the arm reaches the specified positions or joint angles accurately.
+
+6. **Documentation:**
+   - Document the positions or joint angles you are instructing the arm to reach in your README file.
+   - Explain any key decisions or considerations in your approach.
+
+
+
+
 
 
 ## TEAM MEMBERS ##
