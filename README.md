@@ -715,9 +715,9 @@ With these steps, you should be able to control the UR5 robotic arm using Rviz a
    ```
 
    You will see the output indicating successful mapping. Move the eBot using `teleop_twist_keyboard` in the warehouse to generate the complete map.
-![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/mapping_init.png)
----
 
+---
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/mapping_init.png)
 
 
 ## TEAM MEMBERS ##
