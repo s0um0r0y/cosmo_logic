@@ -421,6 +421,29 @@ You can skip the steps not shown in the below information. We highly encourage y
 
 All the generated files will appear in the "Generated Files/Folders" tab, and you can click on each of them for a description of what they contain. Finally, you can exit the setup assistant.
 
+# RViz Interface for MoveIt! Simulation
+
+In the previous module, you completed the MoveIt! setup assistant and successfully generated MoveIt! configuration files. In this module, you will be using those configuration files for the simulation of the robotic arm.
+
+MoveIt! comes with a plugin for the ROS Visualizer (RViz). The plugin allows you to set up scenes in which the robot will work, generate plans, visualize the output, and interact directly with a visualized robot. We will explore the plugin in this tutorial.
+
+## Visualization of Robotic Arm Planning in RViz
+
+Let's start by visualizing the planning of a robotic arm in RViz. Follow these steps:
+
+1. Launch the demo.launch file from the MoveIt configuration package that you created.
+
+    ```bash
+    ros2 launch ur5_moveit demo.launch.py
+    ```
+
+   This command will launch the robotic arm in RViz.
+
+2. In RViz, you will see a robotic arm and a MotionPlanning display type.
+
+This setup allows you to interact with the simulated robotic arm, visualize planning scenarios, and generate plans using MoveIt! in the RViz interface.
+
+Feel free to explore different functionalities provided by the RViz plugin to enhance your understanding of the robotic arm's behavior in a simulated environment.
 
 
 You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
