@@ -1128,7 +1128,7 @@ The allowed tolerance is:
 
 - Pose: ±0.3 m
 - Orientation: ±10 degrees
-   ![figure1]()
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/IMG8.png)
 **Instructions:**
 
 1. **Mapping:**
