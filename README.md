@@ -1110,7 +1110,50 @@ Cosmo Logistic eBot Navigation with ROS2 Navigation Stack (Nav2). The goal is to
      colcon build
      ```
 
+# Task 1C - Instructions
 
+**Note: Before attempting the task, make sure you have gone through the Learning resources - Autonomous Navigation.**
+
+**Important Note: Pull the latest repo of `eYRC-2023_Cosmo_Logistic` and do the `colcon build` for this task.**
+
+## Task:
+
+For this task, you need to write a single Python script `ebot_nav_cmd.py` to navigate the eBot through specified poses. The poses include both position and orientation ([x, y, yaw]) in the following order:
+
+1. **P1:** [1.8, 1.5, 1.57]
+2. **P2:** [2.0, -7.0, -1.57]
+3. **P3:** [-3.0, 2.5, 1.57]
+
+The allowed tolerance is:
+
+- Pose: ±0.3 m
+- Orientation: ±10 degrees
+   ![figure1]()
+**Instructions:**
+
+1. **Mapping:**
+   - Map the warehouse using `slam_toolbox`. Follow the resources provided in the Mapping subsection of ROS2 Navigation in the Learning Resources Section.
+   - Create and save the map with a name like `map_name.pgm`.
+
+2. **Navigation Script (`ebot_nav_cmd.py`):**
+   - Write a Python script to navigate the eBot through the specified poses.
+   - Use the Simple Commander API by Nav2 to create the script.
+   - Refer to the Navigation subsection of ROS2 Navigation in the Learning Resources Section for guidance.
+   - Ensure that the script considers the specified poses and tolerances.
+
+**Hint:**
+   - You can refer to the Simple Commander API by Nav2 to create the script.
+   - Tune the Nav2 parameters in `nav2_param.yaml` to achieve the desired navigation behavior.
+
+**Expected Output:**
+   - Submit the Python script (`ebot_nav_cmd.py`).
+   - Submit the map created using `slam_toolbox` with a filename like `map_name.pgm`.
+
+**Submission:**
+   - Include the Python script (`ebot_nav_cmd.py`) and the map file (`map_name.pgm`) in your submission.
+   - Update your README file with information about the navigation script and any relevant details.
+
+Embark on this navigation quest with the eBot, and may your script guide it through the lunar warehouse with precision!
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
