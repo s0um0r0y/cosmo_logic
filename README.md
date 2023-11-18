@@ -1145,15 +1145,63 @@ The allowed tolerance is:
    - You can refer to the Simple Commander API by Nav2 to create the script.
    - Tune the Nav2 parameters in `nav2_param.yaml` to achieve the desired navigation behavior.
 
-**Expected Output:**
-   - Submit the Python script (`ebot_nav_cmd.py`).
-   - Submit the map created using `slam_toolbox` with a filename like `map_name.pgm`.
+# Task 2 - Instructions
 
-**Submission:**
-   - Include the Python script (`ebot_nav_cmd.py`) and the map file (`map_name.pgm`) in your submission.
-   - Update your README file with information about the navigation script and any relevant details.
+## Welcome to Task 2!
 
-Embark on this navigation quest with the eBot, and may your script guide it through the lunar warehouse with precision!
+**Note: Before starting Task 2, make sure to update your repository. Navigate inside the `src` folder of your workspace and execute the following commands:**
+
+```bash
+git stash
+git pull
+git stash pop
+```
+
+If you encounter any issues with plugins, try the following:
+
+```bash
+pip3 install cryptocode
+sudo cp libgazebo_link_ur5_attacher.so /usr/lib/x86_64-linux-gnu/gazebo-11/plugins/
+sudo cp libgazebo_link_attacher.so /usr/lib/x86_64-linux-gnu/gazebo-11/plugins/
+```
+
+**Colcon Build:**
+
+After making changes in any files, you need to rebuild the workspace using:
+
+```bash
+colcon build
+```
+
+If you want to skip the step of building every time a file is changed, you may use the `colcon build --symlink-install` parameter.
+
+---
+
+## Task 2A - Manipulation with Vision
+
+### Part 1: Locating Aruco in the World with Respect to Arm and Picking the Boxes
+
+Your goal in this part is to locate Aruco markers in the world with respect to the arm and pick the boxes.
+
+## Task 2B - Dock and Place
+
+### Part 2: Move the Rack Around Using eBot
+
+In this part, you will work on moving the rack around using eBot.
+
+**Instructions:**
+
+1.Write a Python script to detect Aruco markers using image data from the camera and publish TF (transform).
+2.Subscribe to camera topics to get RGB and Depth images for Aruco detection. The camera plugins will publish image data in ROS Image data format.
+3.Detect Aruco tags present on each package box within the camera/robot arm's vicinity.
+4.Find the center pose (position and orientation) of these package boxes and send transforms between the box/object frame (center position of Aruco tag) and the base_link of the robot arm.
+5.Implement a motion planning algorithm to pick the boxes. Ensure that the motion planning takes into account the Aruco marker information and the current state of the robot arm.
+6.Save the detected Aruco tags with their IDs and positions in a file for future reference.
+7.Implement a strategy to handle the variability in the box positions, considering that the boxes will be spawned randomly at different positions each time you launch.
+
+
+
+
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
