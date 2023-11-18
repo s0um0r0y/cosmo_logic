@@ -1016,7 +1016,99 @@ In Task 1B, your objective is to create a Python script to control the UR5 robot
 5. **Visualization:**
    - Visualize the arm movements in RViz to ensure they align with the specified positions.
 
+# Task 1C - Navigation
 
+**Task Objective:**
+Cosmo Logistic eBot Navigation with ROS2 Navigation Stack (Nav2). The goal is to set up the ROS2 Navigation Stack (Nav2), learn the tools provided by it, and navigate a robot within a lunar warehouse.
+
+## Instructions:
+
+### 1. **Setup ROS2 Navigation Stack (Nav2):**
+
+   - Install the necessary packages using your operating system’s package manager. Include these in your README file for others to replicate:
+
+     ```bash
+     sudo apt install ros-humble-navigation2
+     sudo apt install ros-humble-nav2-bringup
+     sudo apt install ros-humble-slam-toolbox
+     sudo apt install ros-humble-robot-localization
+     sudo apt install ros-humble-joint-state-publisher-gui
+     sudo apt install ros-humble-xacro
+     ```
+
+### 2. **Pull the Latest Repository:**
+
+   - Pull the latest repository of `eYRC-2023_Cosmo_Logistic` in your workspace.
+
+### 3. **Check for ebot_nav2 Package:**
+
+   - Check for the `ebot_nav2` package in the repository.
+
+### 4. **Set Parameters for slam-toolbox:**
+
+   - Set the parameters for slam-toolbox in the `mapper_params_online_async.yaml` file in the `ebot_nav2/config/` directory.
+
+   ```yaml
+   # ROS Parameters
+   odom_frame: odom
+   map_frame: map
+   base_frame: base_footprint
+   scan_topic: /scan
+   mode: mapping
+   ```
+
+### 5. **Load Parameters and Add slam-toolbox Node:**
+
+   - Load the `mapper_params_online_async.yaml` and add the slam_toolbox node in `ebot_bringup_launch.py` launch file in the `ebot_nav2/launch/` directory.
+
+   ```python
+   # Loading the params
+   declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
+       'async_param',
+       default_value=os.path.join(ebot_nav2_dir, 'config', 'mapper_params_online_async.yaml'),
+       description='Set mappers online async param file')
+
+   # Adding slam-toolbox, with online_async_launch.py
+   mapper_online_async_param_launch = IncludeLaunchDescription(
+       PythonLaunchDescriptionSource(
+           os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_async_launch.py'),
+       ),
+       launch_arguments=[('slam_params_file', LaunchConfiguration('async_param'))],
+   )
+
+   ld.add_action(declare_mapper_online_async_param_cmd)
+   ld.add_action(mapper_online_async_param_launch)
+   ```
+
+### 6. **Launch Gazebo, Teleop, and Navigation:**
+
+   - Launch Gazebo, teleop, and the navigation using the following commands:
+
+     ```bash
+     ros2 launch ebot_description ebot_gazebo_launch.py
+     ros2 run teleop_twist_keyboard teleop_twist_keyboard
+     ros2 launch ebot_nav2 ebot_bringup_launch.py
+     ```
+
+   - Ensure that the robot moves and maps the environment as it navigates.
+
+### 7. **Map Saving:**
+
+   - Build the map without any empty cells in the arena.
+
+   - Go to RViz, add a new panel, and select `SlamToolboxPlugin` under `slam_toolbox`.
+
+   - Enter the map name in both the first two rows and click on both "Save Map" and "Serialize Map."
+
+   - Copy the map files to the `ebot_nav2/maps/` directory.
+
+   - Update the map name in `ebot_bringup_launch.py` and `nav2_params.yaml` launch files.
+
+   - Rebuild the `ebot_nav2` package.
+
+     ```bash
+     colcon build
+     ```
 
 
 
