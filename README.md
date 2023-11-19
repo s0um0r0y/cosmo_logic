@@ -1202,7 +1202,7 @@ In this part, you will work on moving the rack around using eBot.
 Task 2B - Docking
 Objective:
 Implement a docking mechanism for the eBot using ultrasonic sensors and IMU data to align its orientation and position with a rack.
-   ![figure1]()
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img9.png?raw=true)
 Instructions:
 
 Utilize the provided ultrasonic sensors data from topics /ultrasonic_rl/scan (left) and /ultrasonic_rr/scan (right). Extract the distance readings to the rear of the eBot.
