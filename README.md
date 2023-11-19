@@ -1199,7 +1199,46 @@ In this part, you will work on moving the rack around using eBot.
 6.Save the detected Aruco tags with their IDs and positions in a file for future reference.
 7.Implement a strategy to handle the variability in the box positions, considering that the boxes will be spawned randomly at different positions each time you launch.
 
+Task 2B - Docking
+Objective:
+Implement a docking mechanism for the eBot using ultrasonic sensors and IMU data to align its orientation and position with a rack.
+   ![figure1]()
+Instructions:
 
+Utilize the provided ultrasonic sensors data from topics /ultrasonic_rl/scan (left) and /ultrasonic_rr/scan (right). Extract the distance readings to the rear of the eBot.
+
+Use the IMU data from the topic /imu to get the orientation of the eBot.
+
+Implement a docking service using the custom service message provided under ebot_docking/srv/DockSw. The service should take parameters such as linear_dock, orientation_dock, distance, orientation, and rack_no.
+
+The docking service should align the orientation of the eBot with the rack based on the IMU data. You can calculate the angular difference and use a P-controller to achieve the alignment.
+
+If linear_dock is set to true, use the ultrasonic sensors' distance readings to perform linear correction and move the eBot closer to the rack.
+
+Ensure that the docking mechanism considers the specific orientation and position of the rack.
+
+Implement both the service server and client in a Python script, following the provided boilerplate at ebot_docking/scripts/ebot_docking_boilerplate.py. Fill in the logic for the P-controller and the docking mechanism.
+
+Service Message:
+
+python
+Copy code
+# ebot_docking/srv/DockSw
+
+bool linear_dock          # Linear Correction
+bool orientation_dock     # Angular Correction
+float64 distance          # Optional param for distance
+float64 orientation       # Goal Orientation 
+string rack_no            # Rack number
+
+---
+bool success              # Indicates successful run of triggered service
+string message            # Informational, e.g., for error messages
+Note:
+
+Research and understand the P-controller for proper orientation alignment.
+Make use of the ultrasonic sensors' distance readings to implement linear correction.
+Test the docking mechanism in simulation before deploying it on the physical eBot.
 
 
 
