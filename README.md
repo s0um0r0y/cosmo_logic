@@ -1240,7 +1240,37 @@ Research and understand the P-controller for proper orientation alignment.
 Make use of the ultrasonic sensors' distance readings to implement linear correction.
 Test the docking mechanism in simulation before deploying it on the physical eBot.
 
+# Task 2C - Attaching and Detaching Link
 
+## Objective:
+Implement a mechanism to attach and detach the eBot with a rack using Gazebo plugins. The attachment should be performed when the eBot is in close proximity to the rack, simulating the behavior of an electromagnet.
+
+**Instructions:**
+
+1. Use the provided Gazebo plugin commands to attach and detach the link between the eBot and the rack in the simulation environment.
+
+2. The command to attach the link:
+    ```bash
+    ros2 service call /ATTACH_LINK linkattacher_msgs/srv/AttachLink "{model1_name: 'ebot', link1_name: 'ebot_base_link', model2_name: 'rack1', link2_name: 'link'}"
+    ```
+    - Modify `model2_name` with the actual name of the rack model.
+
+3. The command to detach the link:
+    ```bash
+    ros2 service call /DETACH_LINK linkattacher_msgs/srv/DetachLink "{model1_name: 'ebot', link1_name: 'ebot_base_link', model2_name: 'rack1', link2_name: 'link'}"
+    ```
+    - Modify `model2_name` with the actual name of the rack model.
+
+4. Create a Python client script to call these services for attaching and detaching the link. You can refer to the provided sample snippet.
+
+**Note:**
+- Ensure that the eBot is in close proximity to the rack (within <0.3m) before attempting to attach the link.
+- Test the attachment and detachment mechanism in simulation to ensure its correctness.
+
+
+
+---
+.
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
