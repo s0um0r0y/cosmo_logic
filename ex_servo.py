@@ -59,7 +59,7 @@ class TFListener(Node):
 class ServoNode(Node):
     def __init__(self,targetPose,targetRotations,targetObjName):
         super().__init__('servo_node')
-        self.moveItController=MoveMultipleJointPosition()
+        self.moveItController=MoveMultipleJointPositions()
         callbackGroup=ReentrantCallbackGroup()
         self.attached=False
 
@@ -198,54 +198,51 @@ class ServoNode(Node):
                 self.get_logger().error("lookup transform failed from base_link to tool0.")
 
 
-        def testFunction(self):
-            self.moveItController.dropPoseafterServoing()
+    def testFunction(self):
+        self.moveItController.dropPoseafterServoing()
 
-        def attachLinkSer(self):
-            # print('timer has been cancelled')
-            # Create a client for the AttachLink service
-           attachLinkClient = self.create_client(AttachLink,'/GripperMagnetON')
-           while not attachLinkClient.wait_for_service(timeout_sec=1.0):
-               self.get_logger().info('AttachLink service not found')
-               req = AttachLink.Request()
-               req.model1_name = f'box{self.ids[int(self.current_target_index/2)]}'  # Specify the box name
-               req.link1_name = 'link'
-               req.model2_name = 'ur5'
-               req.link2_name = 'wrist_3_link'
-              # Call the AttachLink service
-               future = attachLinkClient.call_async(req)
-               if future.result() is not None:
-                   if future.result().success:               
-                    self.get_logger().info("Attachment hogaya :):):):):).")
-                    self.attached = True
-                    self.attaching = False
-                   else:
-                    self.get_logger().error("Attachment gaya :((((: %s", future.result().message)
-               else:
-                   self.get_logger().info("gg")    
-                   
-        def detachLinkSer(self):
-            detachLinkClient = self.create_client(DetachLink, '/GripperMagnetOFF')
-            while not  detachLinkClient.wait_for_service(timeout_sec=1.0):
-                self.get_logger().info('detachLink service gaya :((((, rukho zara!!!')
-            req = DetachLink.Request()
-            req.model1_name = f'box{self.ids[int(self.currentTargetIndex/2)]}'  # Specify the box name
+    def attachLinkSer(self):
+        # print('timer has been cancelled')
+        # Create a client for the AttachLink service
+        attachLinkClient = self.create_client(AttachLink,'/GripperMagnetON')
+        while not attachLinkClient.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('AttachLink service not found')
+            req = AttachLink.Request()
+            req.model1_name = f'box{self.ids[int(self.currentDestinationIndex/2)]}'  # Specify the box name
             req.link1_name = 'link'
             req.model2_name = 'ur5'
             req.link2_name = 'wrist_3_link'
             # Call the AttachLink service
-            future = detachLinkClient.call_async(req)
+            future = attachLinkClient.call_async(req)
             if future.result() is not None:
-                if future.result().success:
-                    self.get_logger().info("detachment hogya !!!!.")
-                    self.detached = True
+                if future.result().success:               
+                    self.get_logger().info("Attachment hogaya :):):):):).")
+                    self.attached = True
+                    self.attaching = False
                 else:
-                    self.get_logger().error("detachment gaya sab gaya :(((: %s", future.result().message)
+                    self.get_logger().error("Attachment gaya :((((: ")
             else:
-                self.get_logger().info("gg")
-
-#### naam karan is required.
-
+                self.get_logger().info("gg")    
+                   
+    def detachLinkSer(self):
+        detachLinkClient = self.create_client(DetachLink, '/GripperMagnetOFF')
+        while not  detachLinkClient.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('detachLink service gaya :((((, rukho zara!!!')
+        req = DetachLink.Request()
+        req.model1_name = f'box{self.ids[int(self.currentDestinationIndex/2)]}'  # Specify the box name
+        req.link1_name = 'link'
+        req.model2_name = 'ur5'
+        req.link2_name = 'wrist_3_link'
+        # Call the AttachLink service
+        future = detachLinkClient.call_async(req)
+        if future.result() is not None:
+            if future.result().success:
+                self.get_logger().info("detachment hogya !!!!.")
+                self.detached = True
+            else:
+                self.get_logger().error("detachment gaya sab gaya :(((: %s", future.result().message)
+        else:
+            self.get_logger().info("gg")
 
 class MoveMultipleJointPositions(Node):
     def __init__(self):
@@ -254,9 +251,10 @@ class MoveMultipleJointPositions(Node):
         self.moveit2 = None
         self.detached = False
         self.movit_done = False 
-    def move_2_multiple_joint_positions(self,*joint_positions):
+
+    def moveMultipleJointPositions(self,*joint_positions):
         for i, positions in enumerate(joint_positions,start=1):
-            param_name=f"joint_positions_{i}"
+            param_name=f"joint_positions:{i}"
             self.declare_parameter(param_name,positions)
 
             joint_positions=self.get_parameter(param_name).get_parameter_value().double_array_value
@@ -264,7 +262,8 @@ class MoveMultipleJointPositions(Node):
             self.get_logger().info(f"Moving to {param_name}: {list(joint_positions)}")
             self.moveit2.move_to_configuration(joint_positions)
             self.moveit2.wait_until_executed()
-    def move_to_a_joint_config(self,joint_position):
+
+    def moveJointConfig(self,joint_position):
 
         self.moveit2 = MoveIt2(
             node=self,
@@ -272,7 +271,7 @@ class MoveMultipleJointPositions(Node):
             base_link_name=ur5.base_link_name(),
             end_effector_name=ur5.end_effector_name(),
             group_name=ur5.MOVE_GROUP_ARM,
-            callback_group=ReentrantCallbackGroup()
+            callbackGroup=ReentrantCallbackGroup()
         )
 
         executor=MultiThreadedExecutor(1)
@@ -282,7 +281,7 @@ class MoveMultipleJointPositions(Node):
         self.moveit2.move_to_configuration(joint_position)
         self.moveit2.wait_until_executed()
     
-    def move_to_home_and_drop_pose_after_servoing(self):
+    def dropPoseafterServoing(self):
 
         self.moveit2 = MoveIt2(
             node=self,
@@ -290,7 +289,7 @@ class MoveMultipleJointPositions(Node):
             base_link_name=ur5.base_link_name(),
             end_effector_name=ur5.end_effector_name(),
             group_name=ur5.MOVE_GROUP_ARM,
-            callback_group=ReentrantCallbackGroup()
+            callbackGroup=ReentrantCallbackGroup()
         )
        
         executor = MultiThreadedExecutor(1)
@@ -311,4 +310,54 @@ class MoveMultipleJointPositions(Node):
             -180*(math.pi / 180), -90 * (math.pi / 180), 180 * (math.pi / 180)
         ]
         # Move to multiple joint configurations
-        self.move_to_multiple_joint_positions(joint_positions_2, joint_positions_1)
+        self.moveMultipleJointPositions(joint_positions_2, joint_positions_1)   
+
+def main(args=None):
+    rclpy.init(args=args)
+    tf_listener_node = TFListener()
+    while not tf_listener_node.first_transform_received:
+        rclpy.spin_once(tf_listener_node,timeout_sec=1.0)
+    
+    tf_listener_node.get_logger().info("Tf Listener Node chal nahi raha hai")
+   
+    for obj_name in ["obj_1","obj_3","obj_49"]:
+
+        test = list(tf_listener_node.translations[obj_name])
+        rot = list(tf_listener_node.rotations[obj_name])
+
+        target_rot_euler = list(R.from_quat(rot).as_euler('xyz'))
+
+        yaw = target_rot_euler[2]
+
+        print(yaw)
+
+        while yaw < -math.pi:
+            yaw += 2*math.pi
+
+        error = 0.05
+
+        if abs(yaw - math.pi/2) < error:
+            test[0] -= 0.18
+
+        elif abs(yaw - 0) < error:
+            test[1] += 0.18
+        elif abs(yaw - math.pi) < error:
+            test[1] -= 0.18     
+            
+        dropPose = [-0.47, 0.12, 0.397]
+
+        targetPoses = [tf_listener_node.translations[obj_name],test]
+        targetRotations = [tf_listener_node.rotations[obj_name],tf_listener_node.rotations[obj_name]]
+
+        servoNode = ServoNode(targetPoses,targetRotations,obj_name)
+        while not servoNode.box_done :
+            rclpy.spin_once(servoNode,timeout_sec=0.02)
+
+        servoNode.get_logger().info("servo Node chal raha nahi hai")
+        servoNode.destroy_node() 
+
+    print('the code chal gaya')
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()   
