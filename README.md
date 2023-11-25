@@ -181,6 +181,71 @@ This should open the Gazebo application with the mobile robot (named as ebot) sp
 - `ebot_description`: Contains mobile robot (ebot) description model
 - `eyantra_warehouse`: Contains the warehouse world model
 
+Certainly! Here's the structured content for your GitHub README file:
+
+```markdown
+# Task 1: Repository Update and Setup
+
+Before proceeding with Task 1, make sure to update your repository. If you have already cloned the eYRC - Cosmo Logistics Repo during Task 0, follow these steps. If not, you can directly clone the repo using:
+
+```bash
+git clone https://github.com/eYantra-Robotics-Competition/eYRC-2023_Cosmo_Logistic.git
+```
+
+For those who have made changes and want to preserve them:
+
+1. Navigate inside the `src` folder of your workspace.
+2. Stash your changes using the following command:
+
+```bash
+git stash
+```
+
+3. Pull the updated Task 1 commits from the repo:
+
+```bash
+git pull
+git checkout tags/v1.1.1 . # if doesn't work try `git fetch` and try again
+```
+
+4. Pop your changes from stash:
+
+```bash
+git stash pop
+```
+
+Note:
+
+- For those who haven't changed any files, you can directly run `git pull` and continue.
+- For directly starting with Task 1A.
+
+Next, install required ROS packages for Task 1A:
+
+```bash
+sudo apt-get install ros-humble-joint-state-broadcaster ros-humble-joint-trajectory-controller ros-humble-controller-manager
+```
+
+Do a `colcon build` to build the workspace with the updated packages.
+
+**Note:** After any changes in any files, to reflect the same on the workspace, you need to do `colcon build`.
+
+If you want to skip the step of building every time a file (python script) is changed (note: this doesn't include the addition of files or folders), you may use the `colcon build --symlink-install` parameter with the build command. (Surf over the internet to find more about it)
+
+---
+
+## Task 1: Object Pose Estimation, Arm Manipulation, Autonomous Navigation
+
+This task is divided into three parts:
+
+### 1A: Object Pose Estimation
+Locate Aruco in the world with respect to the robotic arm.
+
+### 1B: Arm Manipulation using Moveit
+Manipulate the robotic arm using the Moveit framework.
+
+### 1C: Autonomous Navigation using Nav2
+Navigate eBot in the Gazebo environment using Nav2.
+
 # Learning Resources for Task 1: Computer Vision with OpenCV
 
 ## 1. Computer Vision
@@ -228,6 +293,984 @@ The idea is to leverage OpenCV to discover properties of the Aruco marker's posi
 
 
 
+# ROS Manipulation Setup
+
+*Recommended time for completing the setup: 20-24 hrs*
+
+In this section, we will learn how to use ROS with the MoveIt2! package to control Robotic Manipulators in the Gazebo Simulator. The skills you acquire here can be applied to control real Robotic Manipulators. The code you write will be translated into actions for actual robots.
+
+## Installation of MoveIt and Related Packages
+
+**Note:** Links for each topic are provided as hyperlinks for detailed reference.
+
+
+1. **MoveIt Package**
+   - [MoveIt Documentation](https://moveit.ros.org/documentation/)
+
+   Install all MoveIt packages, which are binary-built and ready for direct deployment:
+
+   ```bash
+   sudo apt install ros-humble-moveit
+   ```
+
+2. **Joint State Broadcaster Package**
+   - [Joint State Broadcaster Documentation](http://wiki.ros.org/joint_state_publisher)
+
+   This package helps publish joint states to a topic, allowing other dependent nodes to know the state of each joint.
+
+   ```bash
+   sudo apt install ros-humble-joint-state-publisher
+   ```
+
+3. **Joint Trajectory Controller Package**
+   - [Joint Trajectory Controller Documentation](http://wiki.ros.org/joint_trajectory_controller)
+
+   A controller that sends trajectory messages to the robotic arm, specifying joint angle values, velocity, and effort variables.
+
+   ```bash
+   sudo apt install ros-humble-joint-trajectory-controller
+   ```
+
+4. **MoveIt Servo Package**
+   - [MoveIt Servo Documentation](https://moveit.ros.org/)
+
+   This package helps servo the arm using linear velocity input format of a link or actuating all joint angles.
+
+   ```bash
+   sudo apt install ros-humble-moveit-servo
+   ```
+
+5. **Trimesh Package**
+   - [Trimesh Documentation](https://trimsh.org/)
+
+   A Python package for importing mesh files in RViz, enabling the arm to understand environmental collision in its planning scene.
+
+   ```bash
+   pip install trimesh
+   ```
+
+6. **ROS 2 Control CLI Package**
+   - [ROS 2 Control CLI Documentation](https://index.ros.org/p/ros2_control/)
+
+   The ROS 2 control CLI package allows access to each controller in the terminal, similar to accessing ROS 2 topics.
+
+   ```bash
+   sudo apt install ros-humble-ros2controlcli
+   ```
+
+# MoveIt Setup Assistant for ROS 2
+
+![figure3](https://github.com/s0um0r0y/cosmo_logic/blob/main/image3.png)
+
+The MoveIt Setup Assistant is a graphical user interface for configuring any robot for use with MoveIt. Its primary function is generating a Semantic Robot Description Format (SRDF) file for your robot, which specifies additional information required by MoveIt such as planning groups, end effectors, and various kinematic parameters. Additionally, it generates other necessary configuration files for use with the MoveIt pipeline. To use the MoveIt Setup Assistant, you will need to have a URDF file for your robot. 
+
+You can skip the steps not shown in the below information. We highly encourage you to explore the internet for more detailed concepts.
+
+1. **Start:**
+   (Make sure to source the workspace in the terminal before starting these steps)
+
+   ```bash
+   ros2 launch moveit_setup_assistant setup_assistant.launch.py
+   ```
+   This command will open a window with the GUI of the setup assistant.
+
+2. **Select the URDF file of the robotic arm:**
+   - Click on "Create New Moveit Configuration Package."
+   - Select the URDF file of the UR5 arm named as `ur5_arm.urdf.xacro` from the `ur_description/urdf` package.
+     **Note:** Make sure to select only `ur5_arm.urdf.xacro` and NOT any other xacro file.
+   - Click on the "Load Files" button to load the URDF file.
+
+3. **Generate Self-Collision Matrix:**
+   (Make sure to keep the bar of sampling density to its maximum value.)
+   - Click on the "Self-Collisions" pane selector on the left-hand side.
+   - Click on the "Generate Collision Matrix" button. The Setup Assistant will work for a few seconds before presenting you the results of its computation in the main table.
+
+4. **Add Virtual Joints:**
+   Virtual joints are used primarily to attach the robot to the world. Add two virtual joints:
+   - FixedBase: for `base_link` having parent link as `world`
+   - CamBase: for `camera_link` having parent link as `world`
+
+5. **Add Planning Groups:**
+   Planning groups are used to semantically describe different parts of your robot.
+   - Click on "Add Group" button and provide details to resemble more with hardware.
+     - Group Name: `ur_manipulator`
+     - Kinematics solver: `KDLKinematicPlugin`
+     - Click on "Add Joints" and add the specified joints.
+     - Add links as shown.
+     - Add a chain by selecting `base_link` as `base_link` and `tool0` as `tool0`.
+     The final planning group setup should look like the provided window.
+
+6. **Label End Effectors:**
+   - Add an end effector with the following info:
+     - EEF Name: `gripper`
+     - Select Group Name: `ur_manipulator`
+     - Parent Link: `tool0`
+
+7. **Checking ros2_control:**
+   - Make sure that ros2_control has position for `command_interface` and position, velocity for `position_interface`.
+
+8. **Add Author Information:**
+   - Click on the "Author Information" pane.
+   - Enter your name and email address.
+
+9. **Generate Configuration Files:**
+   - Click on the "Configuration Files" pane.
+   - Choose a location and name for the ROS package that will be generated containing your new set of configuration files.
+   - Click on "Generate Package."
+   - The Setup Assistant will generate and write a set of launch and config files into the directory of your choosing.
+
+All the generated files will appear in the "Generated Files/Folders" tab, and you can click on each of them for a description of what they contain. Finally, you can exit the setup assistant.
+
+# RViz Interface for MoveIt! Simulation
+
+In the previous module, you completed the MoveIt! setup assistant and successfully generated MoveIt! configuration files. In this module, you will be using those configuration files for the simulation of the robotic arm.
+
+MoveIt! comes with a plugin for the ROS Visualizer (RViz). The plugin allows you to set up scenes in which the robot will work, generate plans, visualize the output, and interact directly with a visualized robot. We will explore the plugin in this tutorial.
+
+## Visualization of Robotic Arm Planning in RViz
+
+Let's start by visualizing the planning of a robotic arm in RViz. Follow these steps:
+
+1. Launch the demo.launch file from the MoveIt configuration package that you created.
+
+    ```bash
+    ros2 launch ur5_moveit demo.launch.py
+    ```
+
+   This command will launch the robotic arm in RViz.
+
+2. In RViz, you will see a robotic arm and a MotionPlanning display type.
+
+This setup allows you to interact with the simulated robotic arm, visualize planning scenarios, and generate plans using MoveIt! in the RViz interface.
+
+Feel free to explore different functionalities provided by the RViz plugin to enhance your understanding of the robotic arm's behavior in a simulated environment.
+
+
+You can use this Markdown code in your README file to guide users through the installation process for ROS Manipulation with MoveIt and related packages.
+
+
+# Gazebo Interface for ROS Manipulation
+
+**Note: Package & file names, and content of config files might be slightly different.**
+
+Now that we have seen how to use Setup assistant and visualize the movement of the arm in Rviz, let's find out how to simulate it in Gazebo. To make the arm move on Gazebo, we need an interface that will take the commands from MoveIt and convey it to the arm in simulation. This interface, in this scenario, is a controller. The controller is basically a generic control loop feedback mechanism, typically a PID controller, to control the output sent to your actuators.
+
+## ROS Controllers Configuration
+
+1. **ROS Controllers Configuration**
+   
+   A configuration file called `ros_controllers.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ros_controllers.yaml
+
+   controller_manager:
+     ros__parameters:
+       update_rate: 2000
+       joint_trajectory_controller:
+         type: joint_trajectory_controller/JointTrajectoryController
+       joint_state_broadcaster:
+         type: joint_state_broadcaster/JointStateBroadcaster
+
+   joint_trajectory_controller:
+     ros__parameters:
+       command_interfaces:
+         - position
+       state_interfaces:
+         - position
+         - velocity
+       joints:
+         - elbow_joint
+         - shoulder_lift_joint
+         - shoulder_pan_joint
+         - wrist_1_joint
+         - wrist_2_joint
+         - wrist_3_joint
+       state_publish_rate: 100.0
+       action_monitor_rate: 20.0
+       allow_partial_joints_goal: false
+       constraints:
+         stopped_velocity_tolerance: 0.0
+         goal_time: 0.0
+
+   joint_state_broadcaster:
+     ros__parameters:
+       type: joint_state_broadcaster/JointStateBroadcaster
+   ```
+
+2. **MoveIt Controllers Configuration**
+
+   A configuration file called `moveit_controllers.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # moveit_controllers.yaml
+
+   controller_names:
+     - joint_trajectory_controller
+
+   joint_trajectory_controller:
+     action_ns: follow_joint_trajectory
+     type: FollowJointTrajectory
+     default: true
+     joints:
+       - shoulder_pan_joint
+       - shoulder_lift_joint
+       - elbow_joint
+       - wrist_1_joint
+       - wrist_2_joint
+       - wrist_3_joint
+   ```
+
+3. **OMPL Planning Configuration**
+
+   A configuration file called `ompl_planning.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ompl_planning.yaml
+
+   planning_plugin: 'ompl_interface/OMPLPlanner'
+   request_adapters: >-
+       default_planner_request_adapters/AddTimeOptimalParameterization
+       default_planner_request_adapters/FixWorkspaceBounds
+       default_planner_request_adapters/FixStartStateBounds
+       default_planner_request_adapters/FixStartStateCollision
+       default_planner_request_adapters/FixStartStatePathConstraints
+   start_state_max_bounds_error: 0.1
+   ```
+
+4. **Servo Information Configuration**
+
+   A configuration file called `ur_servo.yaml` has to be created inside the `config` folder of the `ur5_moveit` package. Remove the previous contents (if any) and paste the configuration given below:
+
+   ```yaml
+   # ur_servo.yaml
+
+   ###############################################
+   # Modify all parameters related to servoing here
+   ###############################################
+   use_gazebo: true # Whether the robot is started in a Gazebo simulation environment
+
+   ## Properties of incoming commands
+   command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
+   scale:
+     # Scale parameters are only used if command_in_type=="unitless"
+     linear:  0.6  # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
+     rotational:  0.3 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
+     # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
+     joint: 0.01
+   # This is a fudge factor to account for any latency in the system, e.g. network latency or poor low-level
+   # controller performance. It essentially increases the timestep when calculating the target pose, to move the target
+   # pose farther away. [seconds]
+  
+
+
+1. **Launch Gazebo and UR5 Gazebo Spawner:**
+   First, you need to launch Gazebo along with the UR5 Gazebo spawner. Open a terminal and run the following command:
+
+   ```bash
+   ros2 launch ur_description ur5_gazebo_launch.py
+   ```
+
+   This will start Gazebo and load the UR5 robot.
+
+2. **Launch MoveIt! and UR5 MoveIt Spawner:**
+   After launching Gazebo, open a new terminal and run the command:
+
+   ```bash
+   ros2 launch ur5_moveit spawn_ur5_launch_moveit.launch.py
+   ```
+
+   This will launch MoveIt! along with the UR5 MoveIt spawner.
+
+3. **Visualize in Rviz:**
+   After launching both Gazebo and MoveIt!, you can visualize the UR5 in Rviz. Open a new terminal and run:
+
+   ```bash
+   ros2 launch ur5_moveit demo.launch.py
+   ```
+
+   This command will open Rviz and you should be able to see the UR5 robot model. You can interact with the robot in Rviz to plan and execute motions.
+
+4. **Add Visualization Tools:**
+   As mentioned in the note, you need to add other visualization tools to Rviz. Here are the steps to add tools:
+   - Click on the "Panels" tab in Rviz.
+   - Select "MoveIt" from the drop-down menu.
+   - A MoveIt MotionPlanning plugin panel should appear. You can use this panel to plan and execute motions for the UR5.
+  
+
+
+With these steps, you should be able to control the UR5 robotic arm using Rviz and MoveIt!. Make sure to follow the instructions carefully.
+
+---
+
+## Installation Instructions for Navigation (Nav2) and SLAM Toolbox
+
+### Installations
+
+**1. [Nav2](https://navigation.ros.org/index.html):**
+
+   Install the Nav2 packages using your operating system’s package manager:
+
+   ```bash
+   sudo apt install ros-humble-navigation2
+   sudo apt install ros-humble-nav2-bringup
+   ```
+
+**2. [SLAM Toolbox](https://github.com/SteveMacenski/slam_toolbox):**
+
+   Install the SLAM Toolbox that will be used to build the map and can also be used for localization:
+
+   ```bash
+   sudo apt install ros-humble-slam-toolbox
+   ```
+
+**3. [Robot-localization](http://docs.ros.org/en/melodic/api/robot_localization/html/index.html):**
+
+   Install the robot-localization, a collection of state estimation nodes, each of which is an implementation of a nonlinear state estimator for robots moving in 2D or 3D space:
+
+   ```bash
+   sudo apt install ros-humble-robot-localization
+   ```
+
+**4. Others:**
+
+   Additional tools for your robotic setup:
+
+   ```bash
+   sudo apt install ros-humble-joint-state-publisher-gui
+   sudo apt install ros-humble-xacro
+   ```
+
+---
+
+
+
+
+## Mapping Using SLAM-Toolbox in ebot_nav2 Package
+
+1. **Clone the Repository:**
+   First, pull the latest repository of eYRC-2023_Cosmo_Logistic into your workspace. Check for the package `ebot_nav2` and verify the file structure.
+   
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/ebot_nav2_pkg.png)
+
+2. **Check SLAM-Toolbox Installation:**
+   Ensure that SLAM-Toolbox is installed:
+
+   ```bash
+   ros2 pkg list | grep slam_toolbox
+   ```
+
+   If not installed, run the following command:
+
+   ```bash
+   sudo apt install ros-humble-slam-toolbox
+   ```
+
+3. **Set SLAM-Toolbox Parameters:**
+   Set the parameters for SLAM-Toolbox in the file `mapper_params_online_async.yaml` located in the directory `/ebot_nav2/config/`.
+
+   ```yaml
+   # ROS Parameters
+   odom_frame: odom
+   map_frame: map
+   base_frame: base_footprint
+   scan_topic: /scan
+   mode: mapping
+   ```
+
+4. **Load Parameters and Add SLAM-Toolbox Node:**
+   Load the `mapper_params_online_async.yaml` file and add the SLAM-Toolbox node in the `ebot_bringup_launch.py` launch file located in the directory `/ebot_nav2/launch/`. Ensure that it's already added in the launch file.
+
+   ```python
+   # Loading the params
+   declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
+       'async_param',
+       default_value=os.path.join(ebot_nav2_dir, 'config', 'mapper_params_online_async.yaml'),
+       description='Set mappers online async param file')
+
+   # Adding SLAM-Toolbox with online_async_launch.py
+   mapper_online_async_param_launch = IncludeLaunchDescription(
+       PythonLaunchDescriptionSource(
+           os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_async_launch.py'),
+       ),
+       launch_arguments=[('slam_params_file', LaunchConfiguration('async_param'))],
+   )
+   ```
+
+5. **Add Launch Configuration Object:**
+   Add the following lines as the object of `LaunchDescription()` in the same launch file, at the end.
+
+   ```python
+   ld.add_action(declare_mapper_online_async_param_cmd)
+   ld.add_action(mapper_online_async_param_launch)
+   ```
+
+   Save the file.
+
+6. **Launch eBot in Gazebo, Teleop, and Navigation:**
+   Launch the required components:
+
+   ```bash
+   ros2 launch ebot_description ebot_gazebo_launch.py
+   ros2 run teleop_twist_keyboard teleop_twist_keyboard
+   ros2 launch ebot_nav2 ebot_bringup_launch.py
+   ```
+
+   You will see the output indicating successful mapping. Move the eBot using `teleop_twist_keyboard` in the warehouse to generate the complete map.
+
+---
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/mapping_init.png)
+
+
+
+---
+
+## Saving the Map Generated by SLAM-Toolbox
+
+1. **Build a Complete Map:**
+   Ensure that the map generated has no empty cells in the arena or in the middle. Congratulations on creating your first map!
+
+2. **Save the Map in RViz:**
+   - Open RViz and navigate to Panels.
+   - Under "Add New Panels," select `SlamToolboxPlugin` under `slam_toolbox`.
+
+3. **Save the Map:**
+   - In the `SlamToolboxPlugin` panel, enter the map name in the first two rows.
+   - Click on both "Save Map" and "Serialize Map."
+
+   This action will save the map in the currently opened directory, i.e., `/colcon_ws/`.
+
+4. **Copy Map Files to `ebot_nav2` Package:**
+   - Locate the saved map files (`map.data`, `map.pgm`, `map.posegraph`, and `map.yaml`) in the `/colcon_ws/`.
+   - Copy these files to the `maps/` directory of the `ebot_nav2` package, i.e., `/ebot_nav2/maps/`.
+
+5. **Update Map Name in Launch Files:**
+   - Update the map name in the `ebot_bringup_launch.py` launch file located in `/ebot_nav2/launch/`.
+
+   ```python
+   declare_map_yaml_cmd = DeclareLaunchArgument(
+       'map',
+       default_value=os.path.join(ebot_nav2_dir, 'maps', 'map_name.yaml'),  ## Update the map config here
+       description='Full path to map yaml file to load')
+   ```
+
+6. **Update Map Name in Parameters:**
+   - Update the map name in the `nav2_params.yaml` launch file located in `/ebot_nav2/params/`.
+
+   ```yaml
+   map_server:
+     ros__parameters:
+       use_sim_time: True
+       yaml_filename: "map_name.yaml"  ## Update the map name here
+   ```
+
+7. **Rebuild the `ebot_nav2` Package:**
+   - Since you added map files to the `ebot_nav2` package, you need to rebuild it.
+
+   ```bash
+   colcon build
+   ```
+
+   OR
+
+   ```bash
+   colcon build --symlink-install
+   ```
+
+---
+
+# Task 1A - Object Pose Estimation
+
+## Task Objective:
+The goal of this task is to perform pose estimation of package boxes using Aruco marker detection. The task involves locating package boxes in a warehouse using computer vision, specifically Aruco detection. Each package box is equipped with a unique Aruco marker. The objective is to selectively identify boxes within the robot arm's reach. Follow the instructions to set up your workspace and prepare the robotic arm for its first movement.
+
+## Instructions:
+
+### 1. **Prepare Your Workspace:**
+   Set up your ROS workspace and ensure all necessary dependencies are installed.
+
+### 2. **Robot Arm and Warehouse Environment:**
+   You will be provided with a UR5 robotic arm model situated in a warehouse. The warehouse contains racks and package boxes. The task involves detecting the Aruco markers on these boxes.
+
+### 3. **Aruco Marker Detection:**
+   - Utilize the OpenCV library to detect Aruco markers on the package boxes.
+   - Implement logic to differentiate between different markers and uniquely identify each package box.
+
+### 4. **Pose Estimation:**
+   - Once Aruco markers are detected, employ pose estimation techniques to determine the position and orientation of each package box.
+   - The goal is to calculate the transformation between the Aruco marker's center position on the package box and the `base_link` of the robot arm.
+
+### 5. **Visualization in RViz:**
+   - Publish the calculated transform between Aruco marker centers and the `base_link` of the robot arm.
+   - Visualize the detected package boxes and their poses in RViz for verification.
+
+### 6. **Logical Mathematics:**
+   - Apply logical and mathematical reasoning to ensure accurate pose estimation.
+   - Handle different orientations, distances, and configurations of the Aruco markers.
+
+### 7. **Documentation:**
+   - Clearly document your code, explaining the logic behind marker detection and pose estimation.
+   - Provide details on the mathematical concepts used for pose estimation.
+
+### 8. **Testing and Validation:**
+   - Test the pose estimation on different scenarios within the warehouse.
+   - Validate the accuracy of the detected poses by comparing them with ground truth if available.
+
+### 9. **Submission:**
+   - Submit your well-documented code along with any supporting files.
+   - Include instructions on how to run and test your code.
+
+### 10. **Additional Challenge (Optional):**
+   - Implement a method to dynamically update the pose estimation as the robot arm moves or as the environment changes.
+   - Explore advanced computer vision techniques for more robust detection and pose estimation.
+
+
+![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/task1a_arena.png)
+
+# Task 1A - Instructions
+
+**Objective:**
+The objective of this task is to develop a Python script for detecting Aruco markers on package boxes using RGB and Depth image data from the robot's camera. The script should publish the transform between the Aruco marker's center position and the `base_link` frame of the robot arm. Additionally, the detected Aruco tags and their center points should be displayed on the RGB image using the OpenCV library.
+
+**Instructions:**
+
+1. **Boilerplate Script:**
+   - Start with the provided boilerplate script named `task1a.py` located in the `scripts` folder of the `ur_description` package. This script provides guidance on the steps and instructions to complete Task 1A.
+
+2. **Dependencies Installation:**
+   - Ensure that the required ROS packages are installed by running the following command in the terminal:
+
+     ```bash
+     sudo apt-get install ros-humble-joint-state-broadcaster ros-humble-joint-trajectory-controller ros-humble-controller-manager
+     ```
+
+3. **Environment Setup:**
+   - Launch the robot in Gazebo and open RViz by running the following commands in separate terminals:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch.py
+     ```
+
+   - Keep these terminals running.
+
+4. **Run the Python Script:**
+   - Execute your Task 1A Python script in a new terminal. Replace the package name and filename if you are not using the provided boilerplate script.
+
+     ```bash
+     ros2 run ur_description task1a.py
+     ```
+
+5. **Visualization in RViz:**
+   - In RViz:
+     - Set the fixed frame as "world."
+     - Add a new display or press Ctrl + N.
+     - Select "TF" in the "By display type" section.
+     - Add "PointCloud2" from the "By display type" section.
+
+   - You will see all TF frames published on the "world" frame. Uncheck 'All Enabled' and only select `obj_<marker_id>` (the final box frame you are publishing) in the TF frames list.
+
+6. **Expected Output:**
+   - Compare the execution of your Python script with TF in RViz. The RViz window should display the Aruco marker's transform in relation to the robot arm's `base_link` frame.
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img5.png)
+
+   - The script should also display Aruco tags and their center points on the RGB image.
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img6.png)
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img7.png)
+7. **Documentation:**
+   - Ensure that your code is well-documented, explaining the logic behind Aruco marker detection and pose estimation.
+
+8. **Testing and Validation:**
+   - Test the script on different scenarios within the warehouse.
+   - Validate the accuracy of the detected poses.
+
+
+10. **Additional Notes:**
+   - Use OpenCV2 for image processing. Other libraries can be chosen if confident but may not receive support from the e-Yantra team.
+   - Handle duplicate boxes with the same Aruco IDs to avoid processing boxes that are not in the reach of the robot arm.
+
+
+# Task 1A - Additional Notes
+
+**Points to Note:**
+
+1. **Z-Axis Orientation:**
+   - In the image window, the Z-axis is drawn away from the box. However, for practical use in the robot arm's picking motion (Task 1B), the Z-axis in the TF should be oriented towards the box. Ensure that when sending the transform, the Z-axis is inverted, pointing towards the box.
+
+2. **Image Window Annotations:**
+   - Draw Aruco tag borders on the image window.
+   - Mark a small circular dot representing the center position of the tag.
+   - Display the Aruco tag ID along with the tag.
+
+3. **Handling Difficulty:**
+   - There might be package boxes placed at the back of the front rack with Aruco IDs. This is intentionally done to increase the task difficulty. Ensure that your code:
+     - Avoids drawing axes for such package boxes.
+     - Does not send a transform with respect to `base_link` for boxes that are away from the robot arm's reach position.
+
+4. **TF Orientation Example:**
+   - The TF orientation should resemble the example above, with the Z-axis pointing towards the box.
+
+**Implementation Tips:**
+
+- Consider using OpenCV functions to draw Aruco tag borders, center points, and annotations on the image.
+- Be cautious about duplicate Aruco IDs and handle them appropriately.
+- Test your implementation in various scenarios to ensure robustness.
+
+# Task 1B - Instructions
+
+**Note: Before attempting the task, make sure you have gone through the learning resources on robotic arm manipulation and Moveit framework.**
+
+### Task Objective:
+
+In Task 1B, your objective is to perform motion planning for the UR5 robotic arm using the Moveit framework. The task involves reaching specific positions or joint angles to prepare the arm for the future task of picking boxes from racks.
+
+### Instructions:
+
+1. **Launch the Environment:**
+   - First, launch the UR5 robot in Gazebo along with RViz. Use the following commands in separate terminals:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch.py
+     ```
+
+2. **Run the Moveit Configuration Script:**
+   - Run the Moveit configuration script to configure the Moveit framework for the UR5 robot. Use the following command:
+
+     ```bash
+     ros2 launch ur5_moveit_config ur5_moveit_planning_execution.launch.py sim:=true
+     ```
+
+3. **Launch RViz:**
+   - Open RViz to visualize the robot model and the motion planning process:
+
+     ```bash
+     ros2 launch ur5_moveit_config moveit_rviz.launch.py config:=true
+     ```
+
+4. **Run the Python Script:**
+   - Use a Python script to command the UR5 arm to reach specific positions or joint angles. You can write a script that utilizes the Moveit Python API or use the MoveGroupCommander for Python. For example:
+
+     ```bash
+     ros2 run ur5_moveit_config move_group_python_interface.py
+     ```
+
+   - Ensure that your Python script contains the necessary logic to plan and execute arm movements.
+
+5. **Visualize the Motion:**
+   - In RViz, you should be able to visualize the planned motion of the UR5 arm. Make sure the arm reaches the specified positions or joint angles accurately.
+
+6. **Documentation:**
+   - Document the positions or joint angles you are instructing the arm to reach in your README file.
+   - Explain any key decisions or considerations in your approach.
+
+
+# Task 1B - Instructions
+
+**Note: Before attempting the task, make sure you have gone through the learning resources on the manipulation of robotic arm.**
+
+### Task Objective:
+
+In Task 1B, your objective is to create a Python script to control the UR5 robotic arm's movement to pick and drop objects in a specified order. You will be moving the arm to Pick Position 1 (P1), Drop Position (D), and Pick Position 2 (P2).
+
+### Instructions:
+
+1. **Launch Gazebo and Moveit:**
+   - Start Gazebo waiting for UR5 to spawn using the following command:
+
+     ```bash
+     ros2 launch ur_description ur5_gazebo_launch.py
+     ```
+
+   - Use the launch file created during the Moveit setup assistant, i.e., `spawn_ur5_launch_moveit.launch.py`, to spawn the UR5 arm in Gazebo and RViz:
+
+     ```bash
+     ros2 launch ur_description spawn_ur5_launch_moveit.launch.py
+     ```
+
+2. **Write the Python Script:**
+   - Create a single Python script that moves the UR5 arm in the specified order: P1 → D → P2 → D.
+   - You are free to use the servoing method, or let Moveit plan (actuate directly by giving pose or joint angles using move_group action), or a combination of both.
+   - Feel free to add any intermediate poses if needed to achieve the completion of the task.
+
+3. **Run the Python Script:**
+   - Start your Python script to execute the arm movements:
+
+     ```bash
+     ros2 run ur_description task1b.py
+     ```
+
+   - Ensure that the arm moves in the correct sequence (P1 → D → P2 → D).
+
+4. **Documentation:**
+   - In your README file, document the logic and approach used in your Python script.
+   - Explain any key decisions or considerations made during the arm manipulation.
+   - Include any challenges faced and how you addressed them.
+
+5. **Visualization:**
+   - Visualize the arm movements in RViz to ensure they align with the specified positions.
+
+# Task 1C - Navigation
+
+**Task Objective:**
+Cosmo Logistic eBot Navigation with ROS2 Navigation Stack (Nav2). The goal is to set up the ROS2 Navigation Stack (Nav2), learn the tools provided by it, and navigate a robot within a lunar warehouse.
+
+## Instructions:
+
+### 1. **Setup ROS2 Navigation Stack (Nav2):**
+
+   - Install the necessary packages using your operating system’s package manager. Include these in your README file for others to replicate:
+
+     ```bash
+     sudo apt install ros-humble-navigation2
+     sudo apt install ros-humble-nav2-bringup
+     sudo apt install ros-humble-slam-toolbox
+     sudo apt install ros-humble-robot-localization
+     sudo apt install ros-humble-joint-state-publisher-gui
+     sudo apt install ros-humble-xacro
+     ```
+
+### 2. **Pull the Latest Repository:**
+
+   - Pull the latest repository of `eYRC-2023_Cosmo_Logistic` in your workspace.
+
+### 3. **Check for ebot_nav2 Package:**
+
+   - Check for the `ebot_nav2` package in the repository.
+
+### 4. **Set Parameters for slam-toolbox:**
+
+   - Set the parameters for slam-toolbox in the `mapper_params_online_async.yaml` file in the `ebot_nav2/config/` directory.
+
+   ```yaml
+   # ROS Parameters
+   odom_frame: odom
+   map_frame: map
+   base_frame: base_footprint
+   scan_topic: /scan
+   mode: mapping
+   ```
+
+### 5. **Load Parameters and Add slam-toolbox Node:**
+
+   - Load the `mapper_params_online_async.yaml` and add the slam_toolbox node in `ebot_bringup_launch.py` launch file in the `ebot_nav2/launch/` directory.
+
+   ```python
+   # Loading the params
+   declare_mapper_online_async_param_cmd = DeclareLaunchArgument(
+       'async_param',
+       default_value=os.path.join(ebot_nav2_dir, 'config', 'mapper_params_online_async.yaml'),
+       description='Set mappers online async param file')
+
+   # Adding slam-toolbox, with online_async_launch.py
+   mapper_online_async_param_launch = IncludeLaunchDescription(
+       PythonLaunchDescriptionSource(
+           os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_async_launch.py'),
+       ),
+       launch_arguments=[('slam_params_file', LaunchConfiguration('async_param'))],
+   )
+
+   ld.add_action(declare_mapper_online_async_param_cmd)
+   ld.add_action(mapper_online_async_param_launch)
+   ```
+
+### 6. **Launch Gazebo, Teleop, and Navigation:**
+
+   - Launch Gazebo, teleop, and the navigation using the following commands:
+
+     ```bash
+     ros2 launch ebot_description ebot_gazebo_launch.py
+     ros2 run teleop_twist_keyboard teleop_twist_keyboard
+     ros2 launch ebot_nav2 ebot_bringup_launch.py
+     ```
+
+   - Ensure that the robot moves and maps the environment as it navigates.
+
+### 7. **Map Saving:**
+
+   - Build the map without any empty cells in the arena.
+
+   - Go to RViz, add a new panel, and select `SlamToolboxPlugin` under `slam_toolbox`.
+
+   - Enter the map name in both the first two rows and click on both "Save Map" and "Serialize Map."
+
+   - Copy the map files to the `ebot_nav2/maps/` directory.
+
+   - Update the map name in `ebot_bringup_launch.py` and `nav2_params.yaml` launch files.
+
+   - Rebuild the `ebot_nav2` package.
+
+     ```bash
+     colcon build
+     ```
+
+# Task 1C - Instructions
+
+**Note: Before attempting the task, make sure you have gone through the Learning resources - Autonomous Navigation.**
+
+**Important Note: Pull the latest repo of `eYRC-2023_Cosmo_Logistic` and do the `colcon build` for this task.**
+
+## Task:
+
+For this task, you need to write a single Python script `ebot_nav_cmd.py` to navigate the eBot through specified poses. The poses include both position and orientation ([x, y, yaw]) in the following order:
+
+1. **P1:** [1.8, 1.5, 1.57]
+2. **P2:** [2.0, -7.0, -1.57]
+3. **P3:** [-3.0, 2.5, 1.57]
+
+The allowed tolerance is:
+
+- Pose: ±0.3 m
+- Orientation: ±10 degrees
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/IMG8.png)
+**Instructions:**
+
+1. **Mapping:**
+   - Map the warehouse using `slam_toolbox`. Follow the resources provided in the Mapping subsection of ROS2 Navigation in the Learning Resources Section.
+   - Create and save the map with a name like `map_name.pgm`.
+
+2. **Navigation Script (`ebot_nav_cmd.py`):**
+   - Write a Python script to navigate the eBot through the specified poses.
+   - Use the Simple Commander API by Nav2 to create the script.
+   - Refer to the Navigation subsection of ROS2 Navigation in the Learning Resources Section for guidance.
+   - Ensure that the script considers the specified poses and tolerances.
+
+**Hint:**
+   - You can refer to the Simple Commander API by Nav2 to create the script.
+   - Tune the Nav2 parameters in `nav2_param.yaml` to achieve the desired navigation behavior.
+
+# Task 2 - Instructions
+
+## Welcome to Task 2!
+
+**Note: Before starting Task 2, make sure to update your repository. Navigate inside the `src` folder of your workspace and execute the following commands:**
+
+```bash
+git stash
+git pull
+git stash pop
+```
+
+If you encounter any issues with plugins, try the following:
+
+```bash
+pip3 install cryptocode
+sudo cp libgazebo_link_ur5_attacher.so /usr/lib/x86_64-linux-gnu/gazebo-11/plugins/
+sudo cp libgazebo_link_attacher.so /usr/lib/x86_64-linux-gnu/gazebo-11/plugins/
+```
+
+**Colcon Build:**
+
+After making changes in any files, you need to rebuild the workspace using:
+
+```bash
+colcon build
+```
+
+If you want to skip the step of building every time a file is changed, you may use the `colcon build --symlink-install` parameter.
+
+---
+
+## Task 2A - Manipulation with Vision
+
+### Part 1: Locating Aruco in the World with Respect to Arm and Picking the Boxes
+
+Your goal in this part is to locate Aruco markers in the world with respect to the arm and pick the boxes.
+
+## Task 2B - Dock and Place
+
+### Part 2: Move the Rack Around Using eBot
+
+In this part, you will work on moving the rack around using eBot.
+
+**Instructions:**
+
+1.Write a Python script to detect Aruco markers using image data from the camera and publish TF (transform).
+2.Subscribe to camera topics to get RGB and Depth images for Aruco detection. The camera plugins will publish image data in ROS Image data format.
+3.Detect Aruco tags present on each package box within the camera/robot arm's vicinity.
+4.Find the center pose (position and orientation) of these package boxes and send transforms between the box/object frame (center position of Aruco tag) and the base_link of the robot arm.
+5.Implement a motion planning algorithm to pick the boxes. Ensure that the motion planning takes into account the Aruco marker information and the current state of the robot arm.
+6.Save the detected Aruco tags with their IDs and positions in a file for future reference.
+7.Implement a strategy to handle the variability in the box positions, considering that the boxes will be spawned randomly at different positions each time you launch.
+
+Task 2B - Docking
+Objective:
+Implement a docking mechanism for the eBot using ultrasonic sensors and IMU data to align its orientation and position with a rack.
+   ![figure1](https://github.com/s0um0r0y/cosmo_logic/blob/main/img9.png?raw=true)
+Instructions:
+
+Utilize the provided ultrasonic sensors data from topics /ultrasonic_rl/scan (left) and /ultrasonic_rr/scan (right). Extract the distance readings to the rear of the eBot.
+
+Use the IMU data from the topic /imu to get the orientation of the eBot.
+
+Implement a docking service using the custom service message provided under ebot_docking/srv/DockSw. The service should take parameters such as linear_dock, orientation_dock, distance, orientation, and rack_no.
+
+The docking service should align the orientation of the eBot with the rack based on the IMU data. You can calculate the angular difference and use a P-controller to achieve the alignment.
+
+If linear_dock is set to true, use the ultrasonic sensors' distance readings to perform linear correction and move the eBot closer to the rack.
+
+Ensure that the docking mechanism considers the specific orientation and position of the rack.
+
+Implement both the service server and client in a Python script, following the provided boilerplate at ebot_docking/scripts/ebot_docking_boilerplate.py. Fill in the logic for the P-controller and the docking mechanism.
+
+Service Message:
+
+python
+Copy code
+# ebot_docking/srv/DockSw
+
+bool linear_dock          # Linear Correction
+bool orientation_dock     # Angular Correction
+float64 distance          # Optional param for distance
+float64 orientation       # Goal Orientation 
+string rack_no            # Rack number
+
+---
+bool success              # Indicates successful run of triggered service
+string message            # Informational, e.g., for error messages
+Note:
+
+Research and understand the P-controller for proper orientation alignment.
+Make use of the ultrasonic sensors' distance readings to implement linear correction.
+Test the docking mechanism in simulation before deploying it on the physical eBot.
+
+# Task 2C - Attaching and Detaching Link
+
+## Objective:
+Implement a mechanism to attach and detach the eBot with a rack using Gazebo plugins. The attachment should be performed when the eBot is in close proximity to the rack, simulating the behavior of an electromagnet.
+
+**Instructions:**
+
+1. Use the provided Gazebo plugin commands to attach and detach the link between the eBot and the rack in the simulation environment.
+
+2. The command to attach the link:
+    ```bash
+    ros2 service call /ATTACH_LINK linkattacher_msgs/srv/AttachLink "{model1_name: 'ebot', link1_name: 'ebot_base_link', model2_name: 'rack1', link2_name: 'link'}"
+    ```
+    - Modify `model2_name` with the actual name of the rack model.
+
+3. The command to detach the link:
+    ```bash
+    ros2 service call /DETACH_LINK linkattacher_msgs/srv/DetachLink "{model1_name: 'ebot', link1_name: 'ebot_base_link', model2_name: 'rack1', link2_name: 'link'}"
+    ```
+    - Modify `model2_name` with the actual name of the rack model.
+
+4. Create a Python client script to call these services for attaching and detaching the link. You can refer to the provided sample snippet.
+
+**Note:**
+- Ensure that the eBot is in close proximity to the rack (within <0.3m) before attempting to attach the link.
+- Test the attachment and detachment mechanism in simulation to ensure its correctness.
+
+
+
+---
+.
 
 ## TEAM MEMBERS ##
 | Team ID | Name                   | Branch | Email ID                                |
