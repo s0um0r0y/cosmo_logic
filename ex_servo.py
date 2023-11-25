@@ -1,225 +1,198 @@
 #!/usr/bin/env python3
-import math
-from rclpy.time import Time
 
+from scipy.spatial.transform import Rotation as R
+from tf2_ros import Buffer,TransformListener,LookupException, ConnectivityException, ExtrapolationException, TransformSxception
+from linkattacher_msgs.srv import AttachLink
+from linkattacher_msgs.srv import DetachLink
 from std_srvs.srv import Trigger
 import rclpy
-import tf2_ros
-from tf2_ros import TransformListener,TFMessage
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.duration import Duration
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
-from geometry_msgs.msg import TwistStamped,TransformStamped
+from geometry_msgs.msg import TwistStamped
 from pymoveit2.robots import ur5
-from rclpy.qos import (
-    QoSDurabilityPolicy,
-    QoSHistoryPolicy,
-    QoSProfile,
-    QoSReliabilityPolicy,
-)
-from pymoveit2 import MoveIt2
+import math
 from threading import Thread
-from rclpy.duration import Duration
-from linkattacher_msgs.srv import AttachLink,DetachLink
-from tf2_ros import TransformException
+from pymoveit2 import MoveIt2
+from rclpy.time import Time
 
-class Servocontroller(Node):
+class TFListener(Node):
     def __init__(self):
-        super().__init__('servo_controller')
+        super().__init__('tf_listener')
+        self.tf_buffer=Buffer(Duration(seconds=10.0))
+        self.tf_listener=TransformListener(self.tf_buffer.self)
+        self.translations={"obj_1": None,"obj_3": None,"obj_49": None}
+        self.rotations={"obj_1": None,"obj_3": None,"obj_49": None}
+        self.timer=self.create_timer(1.0,self.lookupTransforms)
+        self.first_transform_received=False
 
-        self.twist_pub=self.create_publisher(TwistStamped,'/servo_node/delta_twist_cmds',10)
-        #self.subscription1=self.create_subscription(TFMessage,'/tf',self.transform_callback,10)
-        self.tf_buffer=tf2_ros.Buffer(Duration(seconds=1))
-        self.tf_listener=tf2_ros.TransformListener(self.tf_buffer,self)
-        self.gripper_control = self.create_client(AttachLink, '/GripperMagnetON')
-        while not self.gripper_control.wait_for_service(timeout_sec=1.0):    
-            self.get_logger().info('EEF service not available, waiting again...')
-        self.gripper_control_2 = self.create_client(DetachLink, '/GripperMagnetOFF')
-        while not self.gripper_control_2.wait_for_service(timeout_sec=1.0):    
-            self.get_logger().info('EEF service not available, waiting again...')
-        self.stop_threshold=0.2
-        self.target_pose=[0,0,0]
-        #self.timer=self.create_timer(0.02,self.servo_reach_target,ReentrantCallbackGroup())
-        self.timer = self.create_timer(1.0, self.lookup_transforms)
-        self.first_transform_received = False  # Flag to track the first transform
-      
-    def lookup_transforms(self):
+    def lookupTransforms(self):
         try:
-            # transform1 = self.tf_buffer.lookup_transform("base_link", "obj_1", Time().to_msg())
-            transform3 = self.tf_buffer.lookup_transform("base_link", "obj_3", Time().to_msg())
-            # transform49 = self.tf_buffer.lookup_transform("base_link", "obj_49", Time().to_msg())
+            transform1=self.tf_buffer.lookup_transform("base_link","obj_1",Time().to_msg())
+            transform3=self.tf_buffer.lookup_transform("base_link","obj_3",Time().to_msg())
+            transform49=self.tf_buffer.lookup_transform("base_link","obj_49",Time().to_msg())
 
-            # Extract and store translations
-            # self.translations= (transform1.transform.translation.x, transform1.transform.translation.y, transform1.transform.translation.z)
-            self.translations = (transform3.transform.translation.x, transform3.transform.translation.y, transform3.transform.translation.z)
-            # self.translations = (transform49.transform.translation.x, transform49.transform.translation.y, transform49.transform.translation.z)
+            self.translations["obj_1"]=(transform1.transform.translation.x,transform1.transform.translation.y,transform1.transform.translation.z)
+            self.translations["obj_3"]=(transform3.transform.translation.x,transform3.transform.translation.y,transform3.transform.translation.z)
+            self.translations["obj_49"]=(transform49.transform.translation.x,transform49.transform.translation.y,transform49.transform.translation.z)
 
-            # Extract and store rotations
-            # self.rotations = (transform1.transform.rotation.x, transform1.transform.rotation.y, transform1.transform.rotation.z, transform1.transform.rotation.w)
-            self.rotations = (transform3.transform.rotation.x, transform3.transform.rotation.y, transform3.transform.rotation.z, transform3.transform.rotation.w)
-            # self.rotations = (transform49.transform.rotation.x, transform49.transform.rotation.y, transform49.transform.rotation.z, transform49.transform.rotation.w)
-
-            # Print or process the transforms as needed
-            print(self.translations)
-            self.first_transform_received=True
-            # Stop the timer after receiving the first transform
-            if self.first_transform_received==True:
-
-                self.timer.cancel()
-                self.pose_reach_target()          
-
-        except TransformException as e:
-            self.get_logger().warning(f"Failed to lookup transforms: {e}")
-
-    '''def transform_callback(self,msg):
-        try:
-                print(msg)
-                self.translation = msg.transforms.transform.translation
-                self.rotation = msg.transforms.rotation
-                self.frame_id = msg.header.frame_id
-
-                # self.get_logger().info(
-                #     f"Received transform: Translation({self.translation.x}, {self.translation.y}, {self.translation.z}), "
-                #     f"Rotation({self.rotation.x}, {self.rotation.y}, {self.rotation.z}, {self.rotation.w}) "
-                #     f"from frame '{self.frame_id}' to frame '{self.child_frame_id}'"
-                # )
-
-                self.target_pose=[self.translation.x,self.translation.y,self.translation.z]
-                print('target pose is',self.target_pose)
-        
-        except Exception as e:
-                self.get_logger().error(f"Error in transform_callback: {e}")'''
-    
-    def send_request_gripper(self,model1,link1,model2,link2):
-            self.req = AttachLink.Request()
-            self.req.model1_name=model1
-            self.req.link1_name=link1
-            self.req.model2_name=model2
-            self.req.link2_name=link2
-            self.future = self.gripper_control.call_async(self.req)
-            rclpy.spin_until_future_complete(self, self.future)
-            self.response = self.future.result()
-            if self.future.result() is not None:
-                self.response = self.future.result()
-                self.get_logger().info('Gripper request was successful: %s' % (self.response.success))
-                self.get_logger().info('Message: %s' % (self.response.message))
-            else:
-                self.get_logger().error('Service call failed.')
-    
-    def send_request_degrip(self,model1,link1,model2,link2):
-        self.req2= DetachLink.Request()
-        self.req2.model1_name=model1
-        self.req2.link1_name=link1
-        self.req2.model2_name=model2
-        self.req2.link2_name=link2
-        self.future2 = self.gripper_control_2.call_async(self.req2)
-        rclpy.spin_until_future_complete(self, self.future2)
-        self.response = self.future2.result()
-        if self.future2.result() is not None:
-                self.response = self.future2.result()
-                self.get_logger().info('Gripper request was successful: %s' % (self.response.success))
-                self.get_logger().info('Message: %s' % (self.response.message))
-        else:
-                self.get_logger().error('Service call failed.')
-
-    
-    def servo_reach_target(self):
-        try:
-            transform=self.tf_buffer.lookup_transform('base_link','obj_3',rclpy.time.Time().to_msg())
-            # transform=self.tf_buffer.lookup_transform('base_link','obj_1',rclpy.time.Time().to_msg())
-            # transform=self.tf_buffer.lookup_transform('base_link','obj_49',rclpy.time.Time().to_msg())
-            translation=transform.transform.translation
-
-            current_pose=[translation.x,translation.y,translation.z]
-
-            distance=math.sqrt((self.target_pose[0]-current_pose[0])**2+
-                               (self.target_pose[1]-current_pose[1])**2+
-                               (self.target_pose[2]-current_pose[2])**2)
+            self.rotations["obj_1"]=(transform1.transform.rotation.x,transform1.transform.rotation.y,transform1.transform.rotation.z,transform1.transform.rotation.w)
+            self.rotations["obj_3"]=(transform3.transform.rotation.x,transform3.transform.rotation.y,transform3.transform.rotation.z,transform3.transform.rotation.w)
+            self.rotations["obj_49"]=(transform49.transform.rotation.x,transform49.transform.rotation.y,transform49.transform.rotation.z,transform49.transform.rotation.w)
             
-            gain=3.0
+            self.printTransforms()
 
-            if distance> self.stop_threshold:
-                linear_velocity=[gain*(self.target_pose[0]-current_pose[0]),
-                                 gain*(self.target_pose[1]-current_pose[1]),
-                                 gain*(self.target_pose[2]-current_pose[2])
-                ]
+            if not self.first_transform_received:
+                self.first_transform_received=True
+                self.timer.reset()
+            
+        except TransformSxception as e:
+            self.get_logger().warning(f"lookup transforms publishing failed:{e}")
 
-                twist_msg=TwistStamped()
-                twist_msg.header.frame_id='base_link'
-                twist_msg.twist.linear.x=linear_velocity[0]
-                twist_msg.twist.linear.y=linear_velocity[1]
-                twist_msg.twist.linear.z=linear_velocity[2]
-                twist_msg.header.stamp=self.get_clock().now().to_msg()
-                self.twist_pub.publish(twist_msg)
-        
-     
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            pass
+    def printTransforms(self):
+        for obj_id in self.translations:
+            self.get_logger().info(f"Transform id : {obj_id}")
+            self.get_logger().info(f"Translation : {self.translations[obj_id]}")
+            self.get_logger().info(f"Rotation : {self.rotations[obj_id]}")
 
-    def start_servo_service(self):
-        start_servo_client=self.create_client(Trigger,'/servo_node/start_servo')
-        if not start_servo_client.wait_for_service(timeout_sec=2):
-            self.get_logger().warn("service is not available")
+class ServoNode(Node):
+    def __init__(self,targetPose,targetRotations,targetObjName):
+        super().__init__('servo_node')
+        self.moveItController=MoveMultipleJointPosition()
+        callbackGroup=ReentrantCallbackGroup()
+        self.attached=False
+
+        self.tf_buffer=Buffer(Duration(seconds=10.0))
+        self.tf_listener=TransformListener(self.tf_buffer,self)
+
+        callbackGroup=ReentrantCallbackGroup()
+        self.twistPub=self.create_publisher(TwistStamped,"/servo_node/delta_twist_cmds",10)
+
+        self.targetPoses=targetPose
+        self.targetRotations=targetRotations
+
+        self.startServo()
+        self.currentDestinationIndex=0
+        #can be modified with a for loop
+        self.ids=[int(targetObjName.split('_')[1])]
+        self.distance_threshold=0.01
+        self.box_done=False
+        self.attaching=False
+
+        self.cons=(math.pi)/180
+
+        self.yaw_right_box_pose = [
+            -90*(math.pi/180),-137*(math.pi/180),138*(math.pi/180),
+            -180*(math.pi/180),-90*(math.pi/180),180*(math.pi/180)]
+
+        self.yaw_left_box_pose = [
+            90*(math.pi/180),-137*(math.pi/180),138*(math.pi/180),
+            -180*(math.pi/180),-90*(math.pi/180),180*(math.pi/180)]
+
+        self.home_pose=[
+            0.0,-137*(math.pi/180),138*(math.pi/180),
+            -180*(math.pi/180),-90*(math.pi/180),180*(math.pi/180)]
+        self.start_servo_service()
+        self.timer=self.create_timer(0.02,self.servo_to_target,callbackGroup)
+
+    def stopServoService(self):
+        stopServoClient=self.create_client(Trigger,"/servo_node/stop_servo")
+        if not stopServoClient.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn("Servo service not working")
         else:
             request=Trigger.Request()
-            future=start_servo_client.call_async(request)
-            rclpy.spin_until_future_complete(self,future=future)
-
+            future = stopServoClient.call_async(request)
+            rclpy.spin_until_future_complete(self,future)
             if future.result() is not None:
                 if future.result().success:
-                    self.get_logger().info("servo controller started")
+                    self.get_logger().info("Servo halted") 
+                    # change the name of node               
+                    self.moveItController.dropPose()                   
                 else:
-                    self.get_logger().error("failed to start servo contoller: %s",future.result().message)
+                    self.get_logger().error("Servo stop failed")
             else:
-                self.get_logger().error("Service call failed")
-
-    def pose_reach_target(self):
-            
-              self.declare_parameter("position", self.translations)
-              self.declare_parameter("quat_xyzw", self.rotations)
-              self.declare_parameter("cartesian", False)
-
-              callback_group1 = ReentrantCallbackGroup()
-
-              moveit2 = MoveIt2(
-                self,
-                joint_names=ur5.joint_names(),
-                base_link_name=ur5.base_link_name(),
-                end_effector_name=ur5.end_effector_name(),
-                group_name=ur5.MOVE_GROUP_ARM,
-                callback_group=callback_group1,
-              )
-              position= self.get_parameter("position").get_parameter_value().double_array_value
-              quat_xyzw = self.get_parameter("quat_xyzw").get_parameter_value().double_array_value
-              cartesian = self.get_parameter("cartesian").get_parameter_value().bool_value
+                self.get_logger().error("Service halted")
     
-              self.get_logger().info(
-              f"  Moving to {{position: {list(position)}, quat_xyzw: {list(quat_xyzw)}}}"
-              )
-              moveit2.move_to_pose(position=position, quat_xyzw=quat_xyzw, cartesian=cartesian)
-              moveit2.wait_until_executed()
-              self.send_request_gripper('box1','link','ur5','writst_3_link')
-              moveit2.move_to_pose(-0.37,0.12,0.397)
-              self.get_logger().info(
-             "moving to drop pose"
-              )
-              moveit2.wait_until_executed()
-       
-
-def main():
-        rclpy.init()
-        node = Servocontroller()
-
-        #node.start_servo_service()
-        #node.servo_reach_target()
-        executor = rclpy.executors.MultiThreadedExecutor(2)
-        executor.add_node(node)
-        executor_thread = Thread(target=executor.spin, daemon=True, args=())
-        executor_thread.start()
-        rclpy.spin(node)
-        rclpy.shutdown()
-        
-if __name__ == "__main__":
-        main()
-
-
     
+    def startServo(self):
+        startServoClient=self.create_client(Trigger,'/servo_node/start_servo')
+
+        if not startServoClient.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn("servo service is failed")
+        else:
+            request=Trigger.Request()
+            future=startServoClient.call_async(request)
+            rclpy.spin_until_future_complete(self,future)
+
+            if future.result() != None:
+                if future.result().success:
+                    self.get_logger().info("Servo initiated")
+                else:
+                    self.get_logger().error("servo is failed")
+            else:
+                self.get_logger().error("Service call fail")
+
+    def servoToDestination(self):   
+        if self.currentDestinationIndex<len(self.targetPoses):
+            try:
+                trans=self.tf_buffer.lookup_transform(ur5.base_link_name(),ur5.end_effector_name(),Time().to_msg())
+                targetPose=self.targetPoses[self.currentDestinationIndex]
+                targetRotation=self.targetRotations[self.currentDestinationIndex]
+
+                presentOrientation=[trans.transform.rotation.x,trans.transform.rotation.y,trans.transform.rotation.z,trans.transform.rotation.w]
+                
+                targetRotEuler=list(R.from_quat(targetRotation).as_euler('xyz'))
+                presentOrientationEuler=list(R.from_quat(presentOrientation).as_euler('xyz'))
+
+                yaw=targetRotEuler[2]-presentOrientationEuler[2]     
+
+                while yaw<-math.pi:
+                    yaw+=2*math.pi
+
+                error=0.05
+
+                if abs(yaw-math.pi/2)<error:
+                    self.moveItController.moveToAJointConfig(self.yaw_left_box_pose)
+
+                elif abs(yaw- -math.pi/2)<error:
+                    self.moveItController.moveToAJointConfig(self.yaw_right_box_pose)
+                               
+                currentPose = [
+                    trans.transform.translation.x,
+                    trans.transform.translation.y,
+                    trans.transform.translation.z
+                ]
+                 
+                diff=[targetPose[i]-currentPose[i] for i in range(3)]
+                # simply using function
+                distance=(sum([diff[i]**2 for i in range(3)]))**0.5
+
+                if distance<self.distance_threshold:
+                    self.attaching=True
+
+                    self.attachLinkService()
+                    
+                    if (self.currentDestinationIndex%2)==1:
+                        self.testFunction()                     
+                        self.detachLinkService()
+                        self.moveItController.moveToAJointConfig(self.home_pose)
+                        self.box_done=True
+                        print(self.box_done) 
+                        if (self.box_done):
+                            self.timer.reset()           
+  
+                    self.currentDestinationIndex+=1
+                    # print(f"Current taget index increased{self.current_target_index}")
+                    
+                else:
+                    scaling_factor = 0.8
+                    twist_msg = TwistStamped()
+                    twist_msg.header.stamp = self.get_clock().now().to_msg()
+                    for i in range(3):
+                        twist_msg.twist.linear.x = diff[0] * scaling_factor
+                        twist_msg.twist.linear.y = diff[1] * scaling_factor
+                        twist_msg.twist.linear.z = diff[2] * scaling_factor
+                    self.twistPub.publish(twist_msg)
+            except (LookupException,ConnectivityException,ExtrapolationException):
+                self.get_logger().error("lookup transform failed from base_link to tool0.")
