@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from scipy.spatial.transform import Rotation as R
-from tf2_ros import Buffer,TransformListener,LookupException, ConnectivityException, ExtrapolationException, TransformSxception
+from tf2_ros import Buffer,TransformListener,LookupException, ConnectivityException, ExtrapolationException, TransformException
 from linkattacher_msgs.srv import AttachLink
 from linkattacher_msgs.srv import DetachLink
 from std_srvs.srv import Trigger
@@ -21,7 +21,7 @@ class TFListener(Node):
     def __init__(self):
         super().__init__('tf_listener')
         self.tf_buffer=Buffer(Duration(seconds=10.0))
-        self.tf_listener=TransformListener(self.tf_buffer.self)
+        self.tf_listener=TransformListener(self.tf_buffer,self)
         self.translations={"obj_1": None,"obj_3": None,"obj_49": None}
         self.rotations={"obj_1": None,"obj_3": None,"obj_49": None}
         self.timer=self.create_timer(1.0,self.lookupTransforms)
@@ -47,7 +47,7 @@ class TFListener(Node):
                 self.first_transform_received=True
                 self.timer.reset()
             
-        except TransformSxception as e:
+        except TransformException as e:
             self.get_logger().warning(f"lookup transforms publishing failed:{e}")
 
     def printTransforms(self):
@@ -93,8 +93,8 @@ class ServoNode(Node):
         self.home_pose=[
             0.0,-137*(math.pi/180),138*(math.pi/180),
             -180*(math.pi/180),-90*(math.pi/180),180*(math.pi/180)]
-        self.start_servo_service()
-        self.timer=self.create_timer(0.02,self.servo_to_target,callbackGroup)
+        self.startServo()
+        self.timer=self.create_timer(0.02,self.servoToDestination,callbackGroup)
 
     def stopServoService(self):
         stopServoClient=self.create_client(Trigger,"/servo_node/stop_servo")
@@ -153,10 +153,10 @@ class ServoNode(Node):
                 error=0.05
 
                 if abs(yaw-math.pi/2)<error:
-                    self.moveItController.moveToAJointConfig(self.yaw_left_box_pose)
+                    self.moveItController.moveJointConfig(self.yaw_left_box_pose)
 
                 elif abs(yaw- -math.pi/2)<error:
-                    self.moveItController.moveToAJointConfig(self.yaw_right_box_pose)
+                    self.moveItController.moveJointConfig(self.yaw_right_box_pose)
                                
                 currentPose = [
                     trans.transform.translation.x,
@@ -171,12 +171,12 @@ class ServoNode(Node):
                 if distance<self.distance_threshold:
                     self.attaching=True
 
-                    self.attachLinkService()
+                    self.attachLinkSer()
                     
                     if (self.currentDestinationIndex%2)==1:
                         self.testFunction()                     
-                        self.detachLinkService()
-                        self.moveItController.moveToAJointConfig(self.home_pose)
+                        self.detachLinkSer()
+                        self.moveItController.moveJointConfig(self.home_pose)
                         self.box_done=True
                         print(self.box_done) 
                         if (self.box_done):
