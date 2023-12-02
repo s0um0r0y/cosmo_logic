@@ -188,8 +188,6 @@ class MyRobotDockingController(Node):
         # Wait until the robot is aligned for docking
         rate.sleep()
         
-
-
         # Set the service response indicating success
         response.success = True
         self.get_logger().info("Docking control initiated")
@@ -207,8 +205,6 @@ def main(args=None):
     distance = 1.22  # Adjust as needed
     goal_orientation = 3.14  # Adjust as needed
     rack_number = "Rack1"  # Replace with the desired rack number
-
-   
 
     executor = MultiThreadedExecutor()
     executor.add_node(my_robot_docking_controller)
