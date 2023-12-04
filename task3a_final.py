@@ -53,8 +53,6 @@ def calculate_rectangle_area(coordinates):
 
     return area,wid
 
-
-
 class aruco_tf(Node):
 
     def __init__(self):
@@ -92,10 +90,7 @@ class aruco_tf(Node):
         aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         parameters=cv2.aruco.DetectorParameters()
         corners,marker_ids,_=cv2.aruco.detectMarkers(gray_image,aruco_dict,parameters=parameters)
-        print("corners:", corners)
         print("marker_ids:", marker_ids)
-
-        print("the marker ids are:",marker_ids)
 
         for i in range(len(marker_ids)):  
             coordinates=corners[i][0]
@@ -139,15 +134,8 @@ class aruco_tf(Node):
         centerCamY = 360
         focalX = 931.1829833984375
         focalY = 931.1829833984375
-        print("hello")
         self.detect_aruco(self.cv_image)
-        print("center_aruco_list:", self.center_aruco_list)
-        print("distance_from_rgb_list:", self.distance_from_rgb_list)
-        print("angle_aruco_list:", self.angle_aruco_list)
-        print("width_aruco_list:", self.width_aruco_list)
         print("ids:", self.ids)
-        print("rvec_list:", self.rvec_list)
-        print("tvec_list:", self.tvec_list)
 
         for i in range(len(self.ids)):
             marker_id = self.ids[i]
