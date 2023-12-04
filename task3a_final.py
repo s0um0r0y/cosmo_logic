@@ -31,7 +31,7 @@
 import rclpy
 import sys
 import cv2
-import math
+import math,time
 import tf2_ros
 from tf2_ros import TransformBroadcaster
 import numpy as np
@@ -53,73 +53,69 @@ def calculate_rectangle_area(coordinates):
 
     return area,wid
 
-def detect_aruco(image):
-     
-    aruco_area_threshold = 1500
-    cam_mat=np.array([[931.1829833984375, 0.0, 640.0], [0.0, 931.1829833984375, 360.0], [0.0, 0.0, 1.0]])
-    dist_mat=np.array([0.0,0.0,0.0,0.0,0.0])
-    size_of_aruco_m=0.15
 
-    center_aruco_list=[]
-    distance_from_rgb_list=[]
-    angle_aruco_list=[]
-    width_aruco_list=[]
-    ids=[]
-    rvec_list=[]
-    tvec_list=[]
-
-    gray_image=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-    parameters=cv2.aruco.DetectorParameters()
-    
-    corners,marker_ids,_=cv2.aruco.detectMarkers(gray_image,aruco_dict,parameters=parameters)
-
-    # to print the particular aruco marker ids
-    print("the marker ids are:",marker_ids)
-
-    for i in range(len(marker_ids)):  
-        coordinates=corners[i][0]
-        area,width=calculate_rectangle_area(coordinates)
-
-        if area>=aruco_area_threshold:
-            c_x=np.mean(coordinates[:,0])
-            c_y=np.mean(coordinates[:,1])
-            center_aruco_list.append((c_x,c_y))
-            rvec,tvec,_ = cv2.aruco.estimatePoseSingleMarkers(corners[i],size_of_aruco_m,cam_mat,dist_mat)
-            rvec_list.append(rvec)
-            tvec_list.append(tvec)
-            tvec = tvec.squeeze(1)
-            distance_from_rgb = tvec[0,2]
-            distance_from_rgb_list.append(distance_from_rgb)
-            angle_aruco_list.append(rvec)
-            width_aruco_list.append(width)
-            ids.append(marker_ids[i][0])
-            cv2.aruco.drawDetectedMarkers(image,corners)
-            cv2.drawFrameAxes(image,cam_mat,dist_mat,rvec,tvec,size_of_aruco_m)
-
-    # to print the centre of the aruco marker
-    print("the centre of the aruco markers are:",center_aruco_list)
-
-    return center_aruco_list,distance_from_rgb_list,angle_aruco_list,width_aruco_list,ids,rvec_list,tvec_list
 
 class aruco_tf(Node):
 
     def __init__(self):
         super().__init__('aruco_tf_publisher')                                       
 
+
         #camera topics are present here and may need to be modified
         self.color_cam_sub=self.create_subscription(Image,'/camera/color/image_raw',self.colorimagecb,10)
         self.depth_cam_sub=self.create_subscription(Image,'/camera/aligned_depth_to_color/image_raw',self.depthimagecb,10)
-
         image_processing_rate=0.4                                                    
         self.bridge=CvBridge()                                                        
         self.tf_buffer=tf2_ros.buffer.Buffer()                                        
         self.listener=tf2_ros.TransformListener(self.tf_buffer,self)
-        self.br=tf2_ros.TransformBroadcaster(self)                                    
+        self.br=tf2_ros.TransformBroadcaster(self)         
+        time.sleep(2)                
         self.timer=self.create_timer(image_processing_rate,self.process_image)     
         
         self.cv_image = None                                                           
         self.depth_image = None                                                         
+
+    def detect_aruco(self,image):
+        aruco_area_threshold = 1500
+        cam_mat=np.array([[931.1829833984375, 0.0, 640.0], [0.0, 931.1829833984375, 360.0], [0.0, 0.0, 1.0]])
+        dist_mat=np.array([0.0,0.0,0.0,0.0,0.0])
+        size_of_aruco_m=0.15
+
+        self.center_aruco_list=[]
+        self.distance_from_rgb_list=[]
+        self.angle_aruco_list=[]
+        self.width_aruco_list=[]
+        self.ids=[]
+        self.rvec_list=[]
+        self.tvec_list=[]
+        gray_image=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+        parameters=cv2.aruco.DetectorParameters()
+        corners,marker_ids,_=cv2.aruco.detectMarkers(gray_image,aruco_dict,parameters=parameters)
+        print("corners:", corners)
+        print("marker_ids:", marker_ids)
+
+        print("the marker ids are:",marker_ids)
+
+        for i in range(len(marker_ids)):  
+            coordinates=corners[i][0]
+            area,width=calculate_rectangle_area(coordinates)
+
+            if area>=aruco_area_threshold:
+                c_x=np.mean(coordinates[:,0])
+                c_y=np.mean(coordinates[:,1])
+                self.center_aruco_list.append((c_x,c_y))
+                rvec,tvec,_ = cv2.aruco.estimatePoseSingleMarkers(corners[i],size_of_aruco_m,cam_mat,dist_mat)
+                self.rvec_list.append(rvec)
+                self.tvec_list.append(tvec)
+                tvec = tvec.squeeze(1)
+                distance_from_rgb = tvec[0,2]
+                self.distance_from_rgb_list.append(distance_from_rgb)
+                self.angle_aruco_list.append(rvec)
+                self.width_aruco_list.append(width)
+                self.ids.append(marker_ids[i][0])
+                cv2.aruco.drawDetectedMarkers(image,corners)
+                cv2.drawFrameAxes(image,cam_mat,dist_mat,rvec,tvec,size_of_aruco_m)
 
     def depthimagecb(self, data):
         try:
@@ -136,29 +132,38 @@ class aruco_tf(Node):
             return
 
     def process_image(self):
+     try :
         sizeCamX = 1280
         sizeCamY = 720
         centerCamX = 640 
         centerCamY = 360
         focalX = 931.1829833984375
         focalY = 931.1829833984375
-        center_aruco_list, distance_from_rgb_list, angle_aruco_list, width_aruco_list, ids, rvec_list, tvec_list = detect_aruco(self.cv_image)
+        print("hello")
+        self.detect_aruco(self.cv_image)
+        print("center_aruco_list:", self.center_aruco_list)
+        print("distance_from_rgb_list:", self.distance_from_rgb_list)
+        print("angle_aruco_list:", self.angle_aruco_list)
+        print("width_aruco_list:", self.width_aruco_list)
+        print("ids:", self.ids)
+        print("rvec_list:", self.rvec_list)
+        print("tvec_list:", self.tvec_list)
 
-        for i in range(len(ids)):
-            marker_id = ids[i]
-            distance_from_rgb=distance_from_rgb_list[i]       
-            angle_aruco=angle_aruco_list[i][0][0]
-        
+        for i in range(len(self.ids)):
+            marker_id = self.ids[i]
+            distance_from_rgb=self.distance_from_rgb_list[i]       
+            angle_aruco=self.angle_aruco_list[i][0][0]
+
             cv_img=R.from_rotvec(angle_aruco).as_euler('xyz',degrees=True)
             send_to_ros=np.array([-cv_img[0]-90,-cv_img[1],cv_img[2]])
             a=R.from_euler('yzx',send_to_ros, degrees=True)
             b=R.from_euler('z',90,degrees=True)
             r=a*b
             quat=r.as_quat()
-            
+
             distance_from_rgb/=1000
 
-            cX,cY=center_aruco_list[i][:2]
+            cX,cY=self.center_aruco_list[i][:2]
             x=distance_from_rgb*(sizeCamX-cX-centerCamX)/focalX
             y=distance_from_rgb*(sizeCamY-cY-centerCamY)/focalY
             z=distance_from_rgb
@@ -171,13 +176,13 @@ class aruco_tf(Node):
 
             rotation_matrix_y=np.array([[np.cos(angle_y_rad),0,np.sin(angle_y_rad)],[0,1,0],[-np.sin(angle_y_rad),0,np.cos(angle_y_rad)]])
             rotation_matrix_z=np.array([[np.cos(angle_z_rad),-np.sin(angle_z_rad),0],[np.sin(angle_z_rad),np.cos(angle_z_rad),0],[0,0,1]])
-            
-            rot_vec=rvec_list[i]
-            trans_vec=tvec_list[i]
+
+            rot_vec=self.rvec_list[i]
+            trans_vec=self.tvec_list[i]
 
             rotation_matrix_from_rvec=R.from_rotvec(rot_vec.reshape(3,))
             rotation_matrix_from_rvec=rotation_matrix_from_rvec.as_matrix()
-           
+
             final_vector=np.dot(rotation_matrix_from_rvec,marker_frame_vec)
             cam_frame_vector=trans_vec+final_vector
             cam_frame_vector=cam_frame_vector.reshape(-1,1)
@@ -216,16 +221,21 @@ class aruco_tf(Node):
             transform_stamped.transform.rotation.z=base_to_camera.transform.rotation.z
             # print("transfrom of base link:",transform_stamped)
             self.br.sendTransform(transform_stamped)
-
         cv2.imshow('Aruco Markers',self.cv_image)
         cv2.waitKey(1) 
+     except Exception as e:
+         print(e)
+
 
 def main():
+
     rclpy.init(args=sys.argv)                                      
     node = rclpy.create_node('aruco_tf_process')                   
     node.get_logger().info('Node created: Aruco tf process')        
     aruco_tf_class = aruco_tf()
+    
     try:
+
         rate=aruco_tf_class.create_rate(500)
         rclpy.spin(aruco_tf_class)
         while rclpy.ok:
