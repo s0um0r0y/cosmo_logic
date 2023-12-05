@@ -53,6 +53,18 @@ def calculate_rectangle_area(coordinates):
 
     return area,wid
 
+def unsharp_mask(image, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0):
+    """Return a sharpened version of the image, using an unsharp mask."""
+    blurred = cv2.GaussianBlur(image, kernel_size, sigma)
+    sharpened = float(amount + 1) * image - float(amount) * blurred
+    sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
+    sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
+    sharpened = sharpened.round().astype(np.uint8)
+    if threshold > 0:
+        low_contrast_mask = np.absolute(image - blurred) < threshold
+        np.copyto(sharpened, image, where=low_contrast_mask)
+    return sharpened
+
 class aruco_tf(Node):
 
     def __init__(self):
@@ -77,7 +89,7 @@ class aruco_tf(Node):
         aruco_area_threshold = 1500
         cam_mat=np.array([[931.1829833984375, 0.0, 640.0], [0.0, 931.1829833984375, 360.0], [0.0, 0.0, 1.0]])
         dist_mat=np.array([0.0,0.0,0.0,0.0,0.0])
-        size_of_aruco_m=0.15
+        size_of_aruco_m=0.3
 
         self.center_aruco_list=[]
         self.distance_from_rgb_list=[]
@@ -86,10 +98,39 @@ class aruco_tf(Node):
         self.ids=[]
         self.rvec_list=[]
         self.tvec_list=[]
+
+        # kernel2=np.ones((5,5),np.float32)/25
+        # blur_image=cv2.filter2D(src=image,ddepth=-1,kernel=kernel2)
+        # blur_image=cv2.GaussianBlur(image,(5,5),0)
+        
+        #image=unsharp_mask(image=image)
+
+        #image = cv2.flip(image, 0)
+
         gray_image=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # cv2.imshow(gray_image)
+        # cv2.imshow('Aruco Markers',gray_image)
+        # cv2.aruco.drawDetectedMarkers(gray_image,corners)
         aruco_dict=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         parameters=cv2.aruco.DetectorParameters()
-        corners,marker_ids,_=cv2.aruco.detectMarkers(gray_image,aruco_dict,parameters=parameters)
+        
+        parameters.minDistanceToBorder =  7
+        parameters.cornerRefinementMaxIterations = 149
+        parameters.minOtsuStdDev= 4.0
+        parameters.adaptiveThreshWinSizeMin= 7
+        parameters.adaptiveThreshWinSizeStep= 49
+        parameters.minMarkerDistanceRate= 0.014971725679291437
+        parameters.maxMarkerPerimeterRate= 30.075976700411534 
+        parameters.minMarkerPerimeterRate= 0.1524866841549599 
+        parameters.polygonalApproxAccuracyRate= 0.05562707541937206
+        parameters.cornerRefinementWinSize= 9
+        parameters.adaptiveThreshConstant= 9.0
+        parameters.adaptiveThreshWinSizeMax= 369
+        parameters.minCornerDistanceRate= 0.09167132584946237
+        
+        corners,marker_ids,reject=cv2.aruco.detectMarkers(gray_image,aruco_dict,parameters=parameters)
+        cv2.aruco.drawDetectedMarkers(gray_image,corners)
+        # cv2.imshow("gray_scale",gray_image)
         print("marker_ids:", marker_ids)
 
         for i in range(len(marker_ids)):  
