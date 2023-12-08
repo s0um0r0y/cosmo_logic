@@ -81,7 +81,7 @@ def detect_aruco(image):
     corners, marker_ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
     print(f"Marker id is {marker_ids}")
 
-    for i in range(len(marker_ids[0])):
+    for i in range(len(marker_ids)):
         
         coordinates = corners[i][0]
         area, width = calculate_rectangle_area(coordinates)
